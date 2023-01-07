@@ -29,11 +29,14 @@ class Card:
     suit: Suit
     num: int
 
+    def __repr__(self):
+        return f"{{{self.suit.name} {self.num}}}"
+
 
 @dataclass
 class Task:
     card: Card
-    token: Token
+    token: Token = Token.NoToken
     complete: bool = False
 
 
@@ -41,7 +44,7 @@ class Task:
 class PlayerState:
     name: str
     hand: list[Card] = field(default_factory=list)
-    played: Card | None = False
+    played: Card | None = None
     collected: list[Card] = field(default_factory=list)
     tasks: list[Task] = field(default_factory=list)
 

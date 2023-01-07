@@ -18,7 +18,7 @@ class Test_solveStep(unittest.TestCase):
             [Task(Card(Suit.Blue, 3), Token.NoToken)],
             [],
         ]
-        self.assertTrue(solveStep(hands, tasks))
+        self.assertIsNotNone(solveStep(hands, tasks))
 
     def test_singleRound_unwinnable(self):
         hands = [
@@ -33,7 +33,7 @@ class Test_solveStep(unittest.TestCase):
             [],
             [],
         ]
-        self.assertFalse(solveStep(hands, tasks))
+        self.assertIsNone(solveStep(hands, tasks))
 
     def test_twoRounds_winnable(self):
         hands = [
@@ -48,7 +48,7 @@ class Test_solveStep(unittest.TestCase):
             [Task(Card(Suit.Magenta, 3), Token.NoToken)],
             [],
         ]
-        self.assertTrue(solveStep(hands, tasks))
+        self.assertIsNotNone(solveStep(hands, tasks))
 
     def test_twoRounds_unwinnable(self):
         hands = [
@@ -63,7 +63,7 @@ class Test_solveStep(unittest.TestCase):
             [Task(Card(Suit.Magenta, 3), Token.NoToken)],
             [],
         ]
-        self.assertFalse(solveStep(hands, tasks))
+        self.assertIsNone(solveStep(hands, tasks))
 
     def test_twoRounds_twoTasks(self):
         hands = [
@@ -79,7 +79,37 @@ class Test_solveStep(unittest.TestCase):
              Task(Card(Suit.Magenta, 7), Token.NoToken)],
             [],
         ]
-        self.assertTrue(solveStep(hands, tasks))
+        self.assertIsNotNone(solveStep(hands, tasks))
+
+    def test_winnerLeadsNextTrick(self):
+        hands = [
+            [Card(Suit.Blue, 1), Card(Suit.Blue, 2)],
+            [Card(Suit.Blue, 3), Card(Suit.Blue, 4)],
+            [Card(Suit.Blue, 5), Card(Suit.Magenta, 1)],
+            [Card(Suit.Blue, 9), Card(Suit.Green, 6)],
+        ]
+        tasks = [
+            [],
+            [],
+            [],
+            [Task(Card(Suit.Magenta, 1), Token.NoToken)],
+        ]
+        self.assertIsNotNone(solveStep(hands, tasks))
+
+    def test_complicated(self):
+        hands = [
+            [Card(Suit.Green, 1), Card(Suit.Yellow, 5), Card(Suit.Yellow, 8)],
+            [Card(Suit.Magenta, 1), Card(Suit.Magenta, 2), Card(Suit.Magenta, 3)],
+            [Card(Suit.Magenta, 4), Card(Suit.Magenta, 5), Card(Suit.Magenta, 6)],
+            [Card(Suit.Green, 9), Card(Suit.Yellow, 6), Card(Suit.Blue, 7)],
+        ]
+        tasks = [
+            [Task(Card(Suit.Green, 9), Token.NoToken)],
+            [],
+            [],
+            [],
+        ]
+        self.assertIsNotNone(solveStep(hands, tasks))
 
 
 class Test_generatePlays(unittest.TestCase):
@@ -230,3 +260,15 @@ class Test_getRemainingTasks(unittest.TestCase):
                                            [[T2, T1], [], []]), [[T2], [], []])
         self.assertEqual(getRemainingTasks(0, cardsPlayed,
                                            [[T1], [T2], []]), [[], [T2], []])
+
+
+class Test_rotateToIndex(unittest.TestCase):
+    def test_rotateToIndex(self):
+        B1 = Card(Suit.Blue, 1)
+        B2 = Card(Suit.Blue, 2)
+        B3 = Card(Suit.Blue, 3)
+        B4 = Card(Suit.Blue, 4)
+        self.assertEqual(rotateToIndex([B1, B2, B3, B4], 0), [B1, B2, B3, B4])
+        self.assertEqual(rotateToIndex([B1, B2, B3, B4], 1), [B2, B3, B4, B1])
+        self.assertEqual(rotateToIndex([B1, B2, B3, B4], 2), [B3, B4, B1, B2])
+        self.assertEqual(rotateToIndex([B1, B2, B3, B4], 3), [B4, B1, B2, B3])

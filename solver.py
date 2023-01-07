@@ -1,16 +1,17 @@
 from model import *
-from typing import Iterator
+from typing import Iterator, TypeVar
 
 Play = list[tuple[Card, list[Card]]]
+T = TypeVar('T')
 
 
-def solve(state: GameState) -> bool | None:
+def solve(state: GameState) -> list[Play] | None:
     hands = [p.hand for p in state.players]
     tasks = [p.tasks for p in state.players]
     return solveStep(hands, tasks)
 
 
-def solveStep(hands: list[list[Card]], tasks: list[list[Task]]) -> bool | None:
+def solveStep(hands: list[list[Card]], tasks: list[list[Task]]) -> list[Play] | None:
     for play in generatePlays(hands, None):
         playedCards = [card for card, remaining in play]
         winnerIndex = playedCards.index(getTrickWinner(playedCards))
@@ -21,13 +22,14 @@ def solveStep(hands: list[list[Card]], tasks: list[list[Task]]) -> bool | None:
             continue
 
         if not any(t for t in remainingTasks):
-            return True
+            return [play]
 
         remainingHands = [remaining for card, remaining in play]
-        result = solveStep(remainingHands, remainingTasks)
+        result = solveStep(rotateToIndex(remainingHands, winnerIndex),
+                           rotateToIndex(remainingTasks, winnerIndex))
         if result:
-            return True
-    return False
+            return [play] + result
+    return None
 
 
 def generatePlays(hands: list[list[Card]], leadSuit: Suit | None) -> Iterator[Play]:
@@ -78,3 +80,7 @@ def getRemainingTasks(winnerIndex: int, playedCards: list[Card], tasks: list[lis
             else:
                 newTasks[i].append(task)
     return newTasks
+
+
+def rotateToIndex(hands: list[T], newLeaderIndex: int) -> list[T]:
+    return hands[newLeaderIndex:] + hands[0:newLeaderIndex]
