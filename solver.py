@@ -12,8 +12,6 @@ SOLVES = 0
 class Play:
     playedCards: list[Card]
     remainingHands: list[Hand]
-    # leader: PlayerIndex
-    # winner: PlayerIndex
 
 
 def solve(state: GameState) -> list[Play] | None:
@@ -27,22 +25,30 @@ def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerInde
     global SOLVES
     SOLVES += 1
     for play in generatePlays(rotateToIndex(hands, leader), None):
-        winnerOffset = play.playedCards.index(getTrickWinner(play.playedCards))
-        winner = (leader + winnerOffset) % len(hands)
-
-        outObjs = [applyPlayToObj(obj, play, winner) for obj in objectives]
-        newObjectives = [x for x in outObjs if isinstance(x, Objective)]
-
-        if not all(bool(x) for x in outObjs):  # An objective has failed
-            continue
-        elif not newObjectives:  # No more objectives
-            return [play]
-        else:
-            newHands = rotateToIndex(play.remainingHands, len(hands) - leader)
-            result = solveStep(newHands, newObjectives, winner)
-            if result:
-                return [play] + result
+        result = solvePlay(play, len(hands), objectives, leader)
+        if result is not None:
+            return result
     return None
+
+
+def solvePlay(play: Play, numPlayers: int, objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
+    winnerOffset = play.playedCards.index(getTrickWinner(play.playedCards))
+    winner = (leader + winnerOffset) % numPlayers
+
+    outObjs = [applyPlayToObj(obj, play, winner) for obj in objectives]
+    newObjectives = [x for x in outObjs if isinstance(x, Objective)]
+
+    if not all(bool(x) for x in outObjs):  # An objective has failed
+        return None
+    elif not newObjectives:  # No more objectives
+        return [play]
+    else:
+        newHands = rotateToIndex(play.remainingHands, numPlayers - leader)
+        result = solveStep(newHands, newObjectives, winner)
+        if result:
+            return [play] + result
+        else:
+            return None
 
 
 def generatePlays(hands: list[Hand], leadSuit: Suit | None) -> Iterator[Play]:
