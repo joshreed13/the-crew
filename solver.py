@@ -1,6 +1,9 @@
 from dataclasses import dataclass
-from model import *
+from functools import partial
+import multiprocessing
 from typing import Iterator, TypeVar
+
+from model import *
 
 T = TypeVar('T')
 Hand = list[Card]
@@ -18,7 +21,7 @@ def solve(state: GameState) -> list[Play] | None:
     hands = [p.hand for p in state.players]
     objectives = state.objectives
     leader = state.currentLeader
-    return solveStep(hands, objectives, leader)
+    return solveStepParallel(hands, objectives, leader)
 
 
 def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
@@ -28,6 +31,25 @@ def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerInde
         result = solvePlay(play, len(hands), objectives, leader)
         if result is not None:
             return result
+    return None
+
+
+def solveStepParallel(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
+    global SOLVES
+    SOLVES += 1
+    multiprocessing.freeze_support()
+    with multiprocessing.Pool() as pool:
+        openingMoves = list(generatePlays(rotateToIndex(hands, leader), None))
+        print(f"Processing {len(openingMoves)} in parallel...")
+        # for result in pool.imap_unordered(partial(solvePlay, numPlayers=len(hands), objectives=objectives, leader=leader), openingMoves):
+        for result in pool.imap_unordered(printPlay, [1, 2, 3]):
+            if result is not None:
+                return result
+    return None
+
+
+def printPlay(play: Play):
+    print(play)
     return None
 
 
