@@ -1,51 +1,62 @@
+from dataclasses import dataclass
 from model import *
 from typing import Iterator, TypeVar
 
-Play = list[tuple[Card, list[Card]]]
 T = TypeVar('T')
+Hand = list[Card]
+
+
+@dataclass
+class Play:
+    playedCards: list[Card]
+    remainingHands: list[Hand]
+    # leader: PlayerIndex
+    # winner: PlayerIndex
 
 
 def solve(state: GameState) -> list[Play] | None:
     hands = [p.hand for p in state.players]
-    tasks = [p.tasks for p in state.players]
-    return solveStep(hands, tasks)
+    objectives = state.objectives
+    leader = state.currentLeader
+    return solveStep(hands, objectives, leader)
 
 
-def solveStep(hands: list[list[Card]], tasks: list[list[Task]]) -> list[Play] | None:
-    for play in generatePlays(hands, None):
-        playedCards = [card for card, remaining in play]
-        winnerIndex = playedCards.index(getTrickWinner(playedCards))
+def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
+    for play in generatePlays(rotateToIndex(hands, leader), None):
+        winnerOffset = play.playedCards.index(getTrickWinner(play.playedCards))
+        winner = (leader + winnerOffset) % len(hands)
 
-        remainingTasks = getRemainingTasks(winnerIndex, playedCards, tasks)
+        outObjs = [applyPlayToObj(obj, play, winner) for obj in objectives]
+        newObjectives = [x for x in outObjs if isinstance(x, Objective)]
 
-        if remainingTasks is None:
+        if not all(bool(x) for x in outObjs):  # An objective has failed
             continue
-
-        if not any(t for t in remainingTasks):
+        elif not newObjectives:  # No more objectives
             return [play]
-
-        remainingHands = [remaining for card, remaining in play]
-        result = solveStep(rotateToIndex(remainingHands, winnerIndex),
-                           rotateToIndex(remainingTasks, winnerIndex))
-        if result:
-            return [play] + result
+        else:
+            newHands = rotateToIndex(play.remainingHands, len(hands) - leader)
+            result = solveStep(newHands, newObjectives, winner)
+            if result:
+                return [play] + result
     return None
 
 
-def generatePlays(hands: list[list[Card]], leadSuit: Suit | None) -> Iterator[Play]:
+def generatePlays(hands: list[Hand], leadSuit: Suit | None) -> Iterator[Play]:
     if not hands:
-        yield []
+        yield Play([], [])
         return
 
-    holdingLeadSuit = (leadSuit is not None) and any(
-        c.suit == leadSuit for c in hands[0])
+    hand = hands[0]
 
-    for card in hands[0]:
+    holdingLeadSuit = (leadSuit is not None) and any(
+        c.suit == leadSuit for c in hand)
+
+    for card in hand:
         if not holdingLeadSuit or card.suit == leadSuit:
-            pickedSuit = leadSuit if leadSuit is not None else card.suit
-            remainingCards = [c for c in hands[0] if c != card]
-            for subplay in generatePlays(hands[1:], pickedSuit):
-                yield [(card, remainingCards)] + subplay
+            newLeadSuit = leadSuit if leadSuit is not None else card.suit
+            remainingHand = [c for c in hand if c != card]
+            for subplay in generatePlays(hands[1:], newLeadSuit):
+                yield Play([card] + subplay.playedCards, [remainingHand] + subplay.remainingHands)
 
 
 def getWinnerOfSuit(cards: list[Card], suit: Suit) -> Card | None:
@@ -68,19 +79,68 @@ def getTrickWinner(cards: list[Card]) -> Card:
         return result
 
 
-def getRemainingTasks(winnerIndex: int, playedCards: list[Card], tasks: list[list[Task]]) -> list[list[Task]] | None:
-    newTasks = [[] for _ in tasks]
-    for i, taskList in enumerate(tasks):
-        for task in taskList:
-            if task.card in playedCards:
-                if i == winnerIndex:
-                    pass  # Task Complete
-                else:
-                    return None
-            else:
-                newTasks[i].append(task)
-    return newTasks
-
-
 def rotateToIndex(hands: list[T], newLeaderIndex: int) -> list[T]:
     return hands[newLeaderIndex:] + hands[0:newLeaderIndex]
+
+
+def applyPlayToObj(objective: Objective, play: Play, winner: PlayerIndex) -> Objective | bool:
+    if isinstance(objective, TaskObjective):
+        return applyPlayToTaskObjective(objective, play, winner)
+    else:
+        raise ValueError("Unsuported objective type")
+
+
+def applyPlayToTaskObjective(objective: TaskObjective, play: Play, winner: PlayerIndex) -> Objective | bool:
+    noMoreAll = False
+    newAbsolute = []
+    for task in objective.absoluteTasks:
+        if task.card in play.playedCards:
+            if noMoreAll:
+                return False
+            elif winner == task.player:
+                pass
+            else:
+                return False
+        else:
+            noMoreAll = True
+            newAbsolute.append(task)
+
+    noMoreRelative = False
+    newRelative = []
+    for task in objective.relativeTasks:
+        if task.card in play.playedCards:
+            if noMoreAll or noMoreRelative:
+                return False
+            elif winner == task.player:
+                pass
+            else:
+                return False
+        else:
+            noMoreRelative = True
+            newRelative.append(task)
+
+    newAnytime = []
+    for task in objective.anytimeTasks:
+        if task.card in play.playedCards:
+            if noMoreAll:
+                return False
+            elif winner == task.player:
+                pass
+            else:
+                return False
+        else:
+            newAnytime.append(task)
+
+    if objective.lastTask is not None:
+        if objective.lastTask in play.playedCards:
+            if objective.absoluteTasks or objective.relativeTasks or objective.anytimeTasks:
+                return False
+            elif winner == objective.lastTask:
+                return True
+            else:
+                return False
+
+    if newAbsolute or newRelative or newAnytime or objective.lastTask:
+        return TaskObjective(False, newAbsolute, newRelative, newAnytime, objective.lastTask)
+    else:
+        return True

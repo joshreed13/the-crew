@@ -12,13 +12,9 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Blue, 8)],
             [Card(Suit.Blue, 3)],
         ]
-        tasks = [
-            [],
-            [],
-            [Task(Card(Suit.Blue, 3), Token.NoToken)],
-            [],
-        ]
-        self.assertIsNotNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(2, Card(Suit.Blue, 3))])]
+        self.assertIsNotNone(solveStep(hands, objs, 0))
 
     def test_singleRound_unwinnable(self):
         hands = [
@@ -27,13 +23,9 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Blue, 8)],
             [Card(Suit.Blue, 3)],
         ]
-        tasks = [
-            [Task(Card(Suit.Blue, 3), Token.NoToken)],
-            [],
-            [],
-            [],
-        ]
-        self.assertIsNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(0, Card(Suit.Blue, 3))])]
+        self.assertIsNone(solveStep(hands, objs, 0))
 
     def test_twoRounds_winnable(self):
         hands = [
@@ -42,13 +34,9 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Yellow, 9), Card(Suit.Magenta, 6)],
             [Card(Suit.Blue, 3), Card(Suit.Magenta, 3)],
         ]
-        tasks = [
-            [],
-            [],
-            [Task(Card(Suit.Magenta, 3), Token.NoToken)],
-            [],
-        ]
-        self.assertIsNotNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(2, Card(Suit.Magenta, 3))])]
+        self.assertIsNotNone(solveStep(hands, objs, 0))
 
     def test_twoRounds_unwinnable(self):
         hands = [
@@ -57,13 +45,9 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Yellow, 3), Card(Suit.Magenta, 6)],
             [Card(Suit.Blue, 3), Card(Suit.Magenta, 3)],
         ]
-        tasks = [
-            [],
-            [],
-            [Task(Card(Suit.Magenta, 3), Token.NoToken)],
-            [],
-        ]
-        self.assertIsNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(2, Card(Suit.Magenta, 3))])]
+        self.assertIsNone(solveStep(hands, objs, 0))
 
     def test_twoRounds_twoTasks(self):
         hands = [
@@ -72,14 +56,9 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Yellow, 9), Card(Suit.Magenta, 6)],
             [Card(Suit.Blue, 3), Card(Suit.Magenta, 3)],
         ]
-        tasks = [
-            [],
-            [],
-            [Task(Card(Suit.Magenta, 3), Token.NoToken),
-             Task(Card(Suit.Magenta, 7), Token.NoToken)],
-            [],
-        ]
-        self.assertIsNotNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(2, Card(Suit.Magenta, 3)), Task(2, Card(Suit.Magenta, 7))])]
+        self.assertIsNotNone(solveStep(hands, objs, 0))
 
     def test_winnerLeadsNextTrick(self):
         hands = [
@@ -88,13 +67,9 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Blue, 5), Card(Suit.Magenta, 1)],
             [Card(Suit.Blue, 9), Card(Suit.Green, 6)],
         ]
-        tasks = [
-            [],
-            [],
-            [],
-            [Task(Card(Suit.Magenta, 1), Token.NoToken)],
-        ]
-        self.assertIsNotNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(3, Card(Suit.Magenta, 1))])]
+        self.assertIsNotNone(solveStep(hands, objs, 0))
 
     def test_complicated(self):
         hands = [
@@ -103,57 +78,55 @@ class Test_solveStep(unittest.TestCase):
             [Card(Suit.Magenta, 4), Card(Suit.Magenta, 5), Card(Suit.Magenta, 6)],
             [Card(Suit.Green, 9), Card(Suit.Yellow, 6), Card(Suit.Blue, 7)],
         ]
-        tasks = [
-            [Task(Card(Suit.Green, 9), Token.NoToken)],
-            [],
-            [],
-            [],
-        ]
-        self.assertIsNotNone(solveStep(hands, tasks))
+        objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
+            Task(0, Card(Suit.Green, 9))])]
+        self.assertIsNotNone(solveStep(hands, objs, 0))
 
 
 class Test_generatePlays(unittest.TestCase):
-    def do(self, hands: list[list[Card]], leadSuit: Suit | None):
+    def do(self, hands: list[Hand], leadSuit: Suit | None):
         return list(generatePlays(hands, leadSuit))
 
     def test_basecase(self):
-        self.assertEqual(self.do([], None), [[]])
-        self.assertEqual(self.do([], Suit.Blue), [[]])
-        self.assertEqual(self.do([], Suit.Rocket), [[]])
+        self.assertEqual(self.do([], None), [Play([], [])])
+        self.assertEqual(self.do([], Suit.Blue), [Play([], [])])
+        self.assertEqual(self.do([], Suit.Rocket), [Play([], [])])
 
     def test_twoPlayers(self):
         G4 = Card(Suit.Green, 4)
         Y1 = Card(Suit.Yellow, 1)
-        self.assertEqual(self.do([[G4], [Y1]], None), [[(G4, []), (Y1, [])]])
+        self.assertEqual(self.do([[G4], [Y1]], None),
+                         [Play([G4, Y1], [[], []])])
 
     def test_twoCards(self):
         G4 = Card(Suit.Green, 4)
         Y1 = Card(Suit.Yellow, 1)
-        result = self.do([[G4, Y1]], None)
-        expected = [[(G4, [Y1])], [(Y1, [G4])]]
-        self.assertEqual(result, expected)
+        self.assertEqual(self.do([[G4, Y1]], None),
+                         [Play([G4], [[Y1]]), Play([Y1], [[G4]])])
 
     def test_followsSuit(self):
         G4 = Card(Suit.Green, 4)
         Y1 = Card(Suit.Yellow, 1)
         Y5 = Card(Suit.Yellow, 5)
-        self.assertEqual(self.do([[G4, Y1]], Suit.Green), [[(G4, [Y1])]])
-        self.assertEqual(self.do([[G4, Y1]], Suit.Yellow), [[(Y1, [G4])]])
+        self.assertEqual(self.do([[G4, Y1]], Suit.Green), [Play([G4], [[Y1]])])
+        self.assertEqual(self.do([[G4, Y1]], Suit.Yellow), [
+                         Play([Y1], [[G4]])])
         self.assertEqual(self.do([[Y1, Y5]], Suit.Yellow), [
-                         [(Y1, [Y5])], [(Y5, [Y1])]])
+                         Play([Y1], [[Y5]]), Play([Y5], [[Y1]])])
 
     def test_singlePlayerSingleCard(self):
         G4 = Card(Suit.Green, 4)
         hand = [G4]
-        self.assertEqual(self.do([hand], None), [[(G4, [])]])
-        self.assertEqual(self.do([hand], Suit.Blue), [[(G4, [])]])
-        self.assertEqual(self.do([hand], Suit.Green), [[(G4, [])]])
-        self.assertEqual(self.do([hand], Suit.Rocket), [[(G4, [])]])
+        self.assertEqual(self.do([hand], None), [Play([G4], [[]])])
+        self.assertEqual(self.do([hand], Suit.Blue), [Play([G4], [[]])])
+        self.assertEqual(self.do([hand], Suit.Green), [Play([G4], [[]])])
+        self.assertEqual(self.do([hand], Suit.Rocket), [Play([G4], [[]])])
 
     def test_twoPlayersSingleCard(self):
         G4 = Card(Suit.Green, 4)
         G2 = Card(Suit.Green, 2)
-        self.assertEqual(self.do([[G4], [G2]], None), [[(G4, []), (G2, [])]])
+        self.assertEqual(self.do([[G4], [G2]], None),
+                         [Play([G4, G2], [[], []])])
 
     def test_twoPlayersTwoCards(self):
         G4 = Card(Suit.Green, 4)
@@ -161,7 +134,7 @@ class Test_generatePlays(unittest.TestCase):
         G8 = Card(Suit.Green, 8)
         M3 = Card(Suit.Magenta, 3)
         self.assertEqual(self.do([[G4, G8], [G2, M3]], None), [
-                         [(G4, [G8]), (G2, [M3])], [(G8, [G4]), (G2, [M3])]])
+                         Play([G4, G2], [[G8], [M3]]), Play([G8, G2], [[G4], [M3]])])
 
 
 class Test_getWinnerOfSuit(unittest.TestCase):
@@ -225,41 +198,39 @@ class Test_getTrickWinner(unittest.TestCase):
             [Card(Suit.Rocket, 2), Card(Suit.Rocket, 4), Card(Suit.Blue, 4)]), Card(Suit.Rocket, 4))
 
 
-class Test_getRemainingTasks(unittest.TestCase):
-    def test_completedTask(self):
-        cardsPlayed = [Card(Suit.Blue, 3), Card(
-            Suit.Green, 7), Card(Suit.Blue, 5)]
-        T1 = Task(Card(Suit.Blue, 5), Token.NoToken)
-        tasks = [[T1], [], []]
-        self.assertEqual(getRemainingTasks(
-            0, cardsPlayed, tasks), [[], [], []])
+class Test_applyPlayToTaskObjective(unittest.TestCase):
+    def test_completedAnytimeTask(self):
+        play = Play([Card(Suit.Blue, 3), Card(
+            Suit.Green, 7), Card(Suit.Blue, 5)], [])
+        T1 = Task(0, Card(Suit.Blue, 5))
+        obj = TaskObjective(False, anytimeTasks=[T1])
+        self.assertEqual(applyPlayToTaskObjective(obj, play, 0), True)
 
-    def test_notComplete(self):
-        cardsPlayed = [Card(Suit.Blue, 3), Card(
-            Suit.Green, 7), Card(Suit.Blue, 5)]
-        T1 = Task(Card(Suit.Blue, 6), Token.NoToken)
-        tasks = [[T1], [], []]
-        self.assertEqual(getRemainingTasks(
-            0, cardsPlayed, tasks), [[T1], [], []])
+    def test_notCompleteAnytimeTask(self):
+        play = Play([Card(Suit.Blue, 3), Card(
+            Suit.Green, 7), Card(Suit.Blue, 5)], [])
+        T1 = Task(0, Card(Suit.Blue, 6))
+        obj = TaskObjective(False, anytimeTasks=[T1])
+        self.assertEqual(applyPlayToTaskObjective(obj, play, 0), obj)
 
-    def test_failedTask(self):
-        cardsPlayed = [Card(Suit.Blue, 3), Card(
-            Suit.Green, 7), Card(Suit.Blue, 5)]
-        T1 = Task(Card(Suit.Blue, 5), Token.NoToken)
-        tasks = [[], [T1], []]
-        self.assertEqual(getRemainingTasks(0, cardsPlayed, tasks), None)
+    def test_failedAnytimeTask(self):
+        play = Play([Card(Suit.Blue, 3), Card(
+            Suit.Green, 7), Card(Suit.Blue, 5)], [])
+        T1 = Task(1, Card(Suit.Blue, 5))
+        obj = TaskObjective(False, anytimeTasks=[T1])
+        self.assertEqual(applyPlayToTaskObjective(obj, play, 0), False)
 
-    def test_twoTasks(self):
-        cardsPlayed = [Card(Suit.Blue, 3), Card(
-            Suit.Green, 7), Card(Suit.Blue, 5)]
-        T1 = Task(Card(Suit.Blue, 5), Token.NoToken)
-        T2 = Task(Card(Suit.Blue, 8), Token.NoToken)
-        self.assertEqual(getRemainingTasks(0, cardsPlayed,
-                                           [[T1, T2], [], []]), [[T2], [], []])
-        self.assertEqual(getRemainingTasks(0, cardsPlayed,
-                                           [[T2, T1], [], []]), [[T2], [], []])
-        self.assertEqual(getRemainingTasks(0, cardsPlayed,
-                                           [[T1], [T2], []]), [[], [T2], []])
+    def test_twoAnytimeTasks(self):
+        play = Play([Card(Suit.Blue, 3), Card(
+            Suit.Green, 7), Card(Suit.Blue, 5)], [])
+        T1 = Task(0, Card(Suit.Blue, 5))
+        T2 = Task(0, Card(Suit.Blue, 8))
+        obj = TaskObjective(False, anytimeTasks=[T1, T2])
+        self.assertEqual(applyPlayToTaskObjective(obj, play, 0),
+                         TaskObjective(False, anytimeTasks=[T2]))
+        obj = TaskObjective(False, anytimeTasks=[T2, T1])
+        self.assertEqual(applyPlayToTaskObjective(obj, play, 0),
+                         TaskObjective(False, anytimeTasks=[T2]))
 
 
 class Test_rotateToIndex(unittest.TestCase):
