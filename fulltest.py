@@ -21,4 +21,5 @@ else:
     for play in result:
         print(play.playedCards)
 
-print((datetime.now() - start).total_seconds())
+time = (datetime.now() - start).total_seconds()
+print(f"{solver.SOLVES} ops in {time:.3f} s ({solver.SOLVES/time:.0f} ops/s)")

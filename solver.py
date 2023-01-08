@@ -5,6 +5,8 @@ from typing import Iterator, TypeVar
 T = TypeVar('T')
 Hand = list[Card]
 
+SOLVES = 0
+
 
 @dataclass
 class Play:
@@ -22,6 +24,8 @@ def solve(state: GameState) -> list[Play] | None:
 
 
 def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
+    global SOLVES
+    SOLVES += 1
     for play in generatePlays(rotateToIndex(hands, leader), None):
         winnerOffset = play.playedCards.index(getTrickWinner(play.playedCards))
         winner = (leader + winnerOffset) % len(hands)
