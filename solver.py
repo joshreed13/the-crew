@@ -3,6 +3,8 @@ from functools import partial
 import multiprocessing
 from typing import Iterator, TypeVar
 
+from tqdm import tqdm
+
 from model import *
 
 T = TypeVar('T')
@@ -41,16 +43,13 @@ def solveStepParallel(hands: list[Hand], objectives: list[Objective], leader: Pl
     with multiprocessing.Pool() as pool:
         openingMoves = list(generatePlays(rotateToIndex(hands, leader), None))
         print(f"Processing {len(openingMoves)} in parallel...")
-        # for result in pool.imap_unordered(partial(solvePlay, numPlayers=len(hands), objectives=objectives, leader=leader), openingMoves):
-        for result in pool.imap_unordered(printPlay, [1, 2, 3]):
+        for ops, result in pool.imap_unordered(partial(solvePlay, numPlayers=len(hands), objectives=objectives, leader=leader), tqdm(openingMoves)):
+            totalOps += ops
             if result is not None:
                 return result
     return None
 
 
-def printPlay(play: Play):
-    print(play)
-    return None
 
 
 def solvePlay(play: Play, numPlayers: int, objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
