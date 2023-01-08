@@ -14,7 +14,7 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(2, Card(Suit.Blue, 3))])]
-        self.assertIsNotNone(solveStep(hands, objs, 0))
+        self.assertIsNotNone(solveStep(hands, objs, 0)[1])
 
     def test_singleRound_unwinnable(self):
         hands = [
@@ -25,7 +25,7 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(0, Card(Suit.Blue, 3))])]
-        self.assertIsNone(solveStep(hands, objs, 0))
+        self.assertIsNone(solveStep(hands, objs, 0)[1])
 
     def test_twoRounds_winnable(self):
         hands = [
@@ -36,7 +36,7 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(2, Card(Suit.Magenta, 3))])]
-        self.assertIsNotNone(solveStep(hands, objs, 0))
+        self.assertIsNotNone(solveStep(hands, objs, 0)[1])
 
     def test_twoRounds_unwinnable(self):
         hands = [
@@ -47,7 +47,7 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(2, Card(Suit.Magenta, 3))])]
-        self.assertIsNone(solveStep(hands, objs, 0))
+        self.assertIsNone(solveStep(hands, objs, 0)[1])
 
     def test_twoRounds_twoTasks(self):
         hands = [
@@ -58,7 +58,7 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(2, Card(Suit.Magenta, 3)), Task(2, Card(Suit.Magenta, 7))])]
-        self.assertIsNotNone(solveStep(hands, objs, 0))
+        self.assertIsNotNone(solveStep(hands, objs, 0)[1])
 
     def test_winnerLeadsNextTrick(self):
         hands = [
@@ -69,7 +69,7 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(3, Card(Suit.Magenta, 1))])]
-        self.assertIsNotNone(solveStep(hands, objs, 0))
+        self.assertIsNotNone(solveStep(hands, objs, 0)[1])
 
     def test_complicated(self):
         hands = [
@@ -80,12 +80,12 @@ class Test_solveStep(unittest.TestCase):
         ]
         objs: list[Objective] = [TaskObjective(False, anytimeTasks=[
             Task(0, Card(Suit.Green, 9))])]
-        self.assertIsNotNone(solveStep(hands, objs, 0))
+        self.assertIsNotNone(solveStep(hands, objs, 0)[1])
 
 
 class Test_generatePlays(unittest.TestCase):
     def do(self, hands: list[Hand], leadSuit: Suit | None):
-        return list(generatePlays(hands, leadSuit))
+        return list(generatePlays(hands, 0, leadSuit))
 
     def test_basecase(self):
         self.assertEqual(self.do([], None), [Play([], [])])

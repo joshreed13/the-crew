@@ -10,8 +10,6 @@ from model import *
 T = TypeVar('T')
 Hand = list[Card]
 
-SOLVES = 0
-
 
 @dataclass
 class Play:
@@ -19,26 +17,25 @@ class Play:
     remainingHands: list[Hand]
 
 
-def solve(state: GameState) -> list[Play] | None:
+def solve(state: GameState) -> tuple[int, list[Play] | None]:
     hands = [p.hand for p in state.players]
     objectives = state.objectives
     leader = state.currentLeader
     return solveStepParallel(hands, objectives, leader)
 
 
-def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
-    global SOLVES
-    SOLVES += 1
+def solveStep(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> tuple[int, list[Play] | None]:
+    totalOps = 1
     for play in generatePlays(rotateToIndex(hands, leader), None):
-        result = solvePlay(play, len(hands), objectives, leader)
+        ops, result = solvePlay(play, len(hands), objectives, leader)
+        totalOps += ops
         if result is not None:
-            return result
-    return None
+            return totalOps, result
+    return totalOps, None
 
 
-def solveStepParallel(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
-    global SOLVES
-    SOLVES += 1
+def solveStepParallel(hands: list[Hand], objectives: list[Objective], leader: PlayerIndex) -> tuple[int, list[Play] | None]:
+    totalOps = 1
     multiprocessing.freeze_support()
     with multiprocessing.Pool() as pool:
         openingMoves = list(generatePlays(rotateToIndex(hands, leader), None))
@@ -46,13 +43,11 @@ def solveStepParallel(hands: list[Hand], objectives: list[Objective], leader: Pl
         for ops, result in pool.imap_unordered(partial(solvePlay, numPlayers=len(hands), objectives=objectives, leader=leader), tqdm(openingMoves)):
             totalOps += ops
             if result is not None:
-                return result
-    return None
+                return totalOps, result
+    return totalOps, None
 
 
-
-
-def solvePlay(play: Play, numPlayers: int, objectives: list[Objective], leader: PlayerIndex) -> list[Play] | None:
+def solvePlay(play: Play, numPlayers: int, objectives: list[Objective], leader: PlayerIndex) -> tuple[int, list[Play] | None]:
     winnerOffset = play.playedCards.index(getTrickWinner(play.playedCards))
     winner = (leader + winnerOffset) % numPlayers
 
@@ -60,16 +55,16 @@ def solvePlay(play: Play, numPlayers: int, objectives: list[Objective], leader: 
     newObjectives = [x for x in outObjs if isinstance(x, Objective)]
 
     if not all(bool(x) for x in outObjs):  # An objective has failed
-        return None
+        return 0, None
     elif not newObjectives:  # No more objectives
-        return [play]
+        return 0, [play]
     else:
         newHands = rotateToIndex(play.remainingHands, numPlayers - leader)
-        result = solveStep(newHands, newObjectives, winner)
+        ops, result = solveStep(newHands, newObjectives, winner)
         if result:
-            return [play] + result
+            return ops, [play] + result
         else:
-            return None
+            return ops, None
 
 
 def generatePlays(hands: list[Hand], leadSuit: Suit | None) -> Iterator[Play]:
