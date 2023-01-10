@@ -83,3 +83,66 @@ pub fn get_suit(card: CardSet) -> CardSet {
         0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_suits() {
+        use super::cards::*;
+
+        assert_eq!(
+            card_list_to_set(&[B1, B2, B3, B4, B5, B6, B7, B8, B9]),
+            suit::BLUE
+        );
+        assert_eq!(
+            card_list_to_set(&[Y1, Y2, Y3, Y4, Y5, Y6, Y7, Y8, Y9]),
+            suit::YELLOW
+        );
+        assert_eq!(
+            card_list_to_set(&[M1, M2, M3, M4, M5, M6, M7, M8, M9]),
+            suit::MAGENTA
+        );
+        assert_eq!(
+            card_list_to_set(&[G1, G2, G3, G4, G5, G6, G7, G8, G9]),
+            suit::GREEN
+        );
+        assert_eq!(card_list_to_set(&[R1, R2, R3, R4]), suit::ROCKETS);
+    }
+
+    #[test]
+    fn test_card_at_position() {
+        assert_eq!(card_at_position(0), 0b1);
+        assert_eq!(card_at_position(1), 0b10);
+        assert_eq!(card_at_position(2), 0b100);
+        assert_eq!(card_at_position(3), 0b1000);
+    }
+
+    #[test]
+    fn test_card_list_to_set() {
+        assert_eq!(card_list_to_set(&[0, 2, 4]), 0b10101);
+    }
+
+    #[test]
+    fn test_get_suit() {
+        use super::cards::*;
+        assert_eq!(get_suit(card_at_position(B1)), suit::BLUE);
+        assert_eq!(get_suit(card_at_position(B4)), suit::BLUE);
+        assert_eq!(get_suit(card_at_position(B9)), suit::BLUE);
+        assert_eq!(get_suit(card_at_position(Y1)), suit::YELLOW);
+        assert_eq!(get_suit(card_at_position(Y4)), suit::YELLOW);
+        assert_eq!(get_suit(card_at_position(Y9)), suit::YELLOW);
+        assert_eq!(get_suit(card_at_position(M1)), suit::MAGENTA);
+        assert_eq!(get_suit(card_at_position(M4)), suit::MAGENTA);
+        assert_eq!(get_suit(card_at_position(M9)), suit::MAGENTA);
+        assert_eq!(get_suit(card_at_position(G1)), suit::GREEN);
+        assert_eq!(get_suit(card_at_position(G4)), suit::GREEN);
+        assert_eq!(get_suit(card_at_position(G9)), suit::GREEN);
+        assert_eq!(get_suit(card_at_position(R1)), suit::ROCKETS);
+        assert_eq!(get_suit(card_at_position(R2)), suit::ROCKETS);
+        assert_eq!(get_suit(card_at_position(R3)), suit::ROCKETS);
+        assert_eq!(get_suit(card_at_position(R4)), suit::ROCKETS);
+        assert_eq!(get_suit(card_at_position(50)), 0);
+    }
+}
