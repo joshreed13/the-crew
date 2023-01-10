@@ -1,15 +1,23 @@
 use crate::card::{card_at_position, get_suit, suit, CardIndex, CardSet};
 use crate::player::{PlayerIndex, NUM_PLAYERS};
 
+pub type Hands = [CardSet; NUM_PLAYERS];
+
 pub struct Play {
-    pub cards: CardSet,
+    cards: CardSet,
     lead_suit: CardSet,
 }
 
-pub fn get_trick_winner(play: &Play) -> CardSet {
-    let eligible_cards = play.lead_suit | suit::ROCKETS;
-    let relevant_cards = play.cards & eligible_cards;
-    get_high_card(relevant_cards)
+impl Play {
+    pub fn get_trick_winner(&self) -> CardSet {
+        let eligible_cards = self.lead_suit | suit::ROCKETS;
+        let relevant_cards = self.cards & eligible_cards;
+        get_high_card(relevant_cards)
+    }
+
+    pub fn cards(&self) -> CardSet {
+        self.cards
+    }
 }
 
 fn get_high_card(cards: CardSet) -> CardSet {
@@ -22,7 +30,7 @@ pub struct PlayGenerator {
 }
 
 impl PlayGenerator {
-    pub fn new(hands: &[CardSet; NUM_PLAYERS], lead_player: PlayerIndex) -> PlayGenerator {
+    pub fn new(hands: &Hands, lead_player: PlayerIndex) -> PlayGenerator {
         let mut obj = PlayGenerator {
             counters: hands.map(PositionCounter::new),
             lead_suit: 0,

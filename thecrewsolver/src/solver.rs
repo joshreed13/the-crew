@@ -1,20 +1,16 @@
 use crate::card::{CardIndex, CardSet};
-use crate::play::{get_trick_winner, Play, PlayGenerator};
-use crate::player::{PlayerIndex, NUM_PLAYERS};
+use crate::play::{Hands, Play, PlayGenerator};
+use crate::player::PlayerIndex;
 use crate::tasks::TasksObjective;
 
 pub struct GameState {
-    hands: [CardSet; NUM_PLAYERS],
+    hands: Hands,
     tasks: TasksObjective,
     curr_leader: PlayerIndex,
 }
 
 impl GameState {
-    pub fn new(
-        hands: [CardSet; NUM_PLAYERS],
-        tasks: TasksObjective,
-        curr_leader: PlayerIndex,
-    ) -> GameState {
+    pub fn new(hands: Hands, tasks: TasksObjective, curr_leader: PlayerIndex) -> GameState {
         GameState {
             hands,
             tasks,
@@ -35,10 +31,10 @@ pub fn solve(state: &GameState) -> bool {
 }
 
 fn solve_play(state: &GameState, play: &Play) -> bool {
-    let winning_card = get_trick_winner(play);
+    let winning_card = play.get_trick_winner();
     let winner = find_player_with_card(&state.hands, winning_card).unwrap();
 
-    let new_tasks = state.tasks.check(play.cards, winner);
+    let new_tasks = state.tasks.check(play.cards(), winner);
 
     match new_tasks {
         None => false,
@@ -46,7 +42,7 @@ fn solve_play(state: &GameState, play: &Play) -> bool {
             if new_tasks.is_complete() {
                 true
             } else {
-                let remaining_hands = get_remaining_hands(&state.hands, play.cards);
+                let remaining_hands = get_remaining_hands(&state.hands, play);
                 let new_state = GameState::new(remaining_hands, new_tasks, winner);
                 solve(&new_state)
             }
@@ -54,7 +50,7 @@ fn solve_play(state: &GameState, play: &Play) -> bool {
     }
 }
 
-fn find_player_with_card(hands: &[CardSet; NUM_PLAYERS], card: CardSet) -> Option<CardIndex> {
+fn find_player_with_card(hands: &Hands, card: CardSet) -> Option<CardIndex> {
     for (i, hand) in hands.iter().enumerate() {
         if hand & card != 0 {
             return Some(i as CardIndex);
@@ -63,6 +59,6 @@ fn find_player_with_card(hands: &[CardSet; NUM_PLAYERS], card: CardSet) -> Optio
     None
 }
 
-fn get_remaining_hands(hands: &[CardSet; NUM_PLAYERS], play: CardSet) -> [CardSet; NUM_PLAYERS] {
-    hands.map(|x| x & !play)
+fn get_remaining_hands(hands: &Hands, play: &Play) -> Hands {
+    hands.map(|x| x & !play.cards())
 }
