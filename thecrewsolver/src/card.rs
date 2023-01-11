@@ -62,7 +62,7 @@ impl CardSet {
         CardSet(1 << (card as u8))
     }
 
-    fn from_value(value: u32) -> Self {
+    pub fn from_bit_index(value: u32) -> Self {
         CardSet(1 << value)
     }
 
@@ -110,7 +110,7 @@ impl CardSet {
     }
 
     pub fn highest_card(&self) -> Self {
-        Self::from_value(RawCardSet::BITS - self.0.leading_zeros())
+        Self::from_bit_index(RawCardSet::BITS - self.0.leading_zeros() - 1)
     }
 
     pub fn is_covered_by(&self, cover: CardSet) -> bool {
@@ -180,12 +180,48 @@ mod tests {
 
     #[test]
     fn test_from_cards() {
-        assert_eq!(CardSet::from_cards(&[B1, B3, B5]).0, 0b10101);
+        assert_eq!(CardSet::from_cards(&[B1, B3, B4]).0, 0b1101);
+    }
+
+    #[test]
+    fn test_from_bit_index() {
+        assert_eq!(CardSet::from_bit_index(5).0, 0b100000);
+    }
+
+    #[test]
+    fn test_from_raw() {
+        assert_eq!(CardSet::from_raw(0b10110).0, 0b10110);
     }
 
     #[test]
     fn test_add() {
         assert_eq!(CardSet::from_card(B1).add(CardSet::from_card(B3)).0, 0b101);
+    }
+
+    #[test]
+    fn test_overlaps_with() {
+        let base = CardSet::from_cards(&[B1, B3, B5]);
+        assert!(base.overlaps_with(CardSet::from_cards(&[B1, B3, B5])));
+        assert!(base.overlaps_with(CardSet::from_cards(&[B5, B6, B7])));
+        assert!(!base.overlaps_with(CardSet::from_cards(&[Y1, Y3, Y5])));
+    }
+
+    #[test]
+    fn test_contains() {
+        assert!(CardSet::from_cards(&[B1, B3, B5]).contains(B1));
+        assert!(!CardSet::from_cards(&[B1, B3, B5]).contains(B2));
+        assert!(!CardSet::from_cards(&[B1, B3, B5]).contains(Y3));
+    }
+
+    #[test]
+    fn test_get_raw() {
+        assert_eq!(CardSet::from_cards(&[B1, B3, B4]).get_raw(), 0b1101);
+    }
+
+    #[test]
+    fn test_raw_reflexive() {
+        let cards = CardSet::from_cards(&[B1, B3, B4]);
+        assert_eq!(CardSet::from_raw(cards.get_raw()), cards);
     }
 
     #[test]
@@ -206,5 +242,60 @@ mod tests {
         assert_eq!(CardSet::from_card(R2).get_suit(), suit::ROCKETS);
         assert_eq!(CardSet::from_card(R3).get_suit(), suit::ROCKETS);
         assert_eq!(CardSet::from_card(R4).get_suit(), suit::ROCKETS);
+    }
+
+    #[test]
+    fn test_highest_card() {
+        assert_eq!(
+            CardSet::from_cards(&[B1]).highest_card(),
+            CardSet::from_card(B1)
+        );
+        assert_eq!(
+            CardSet::from_cards(&[R4]).highest_card(),
+            CardSet::from_card(R4)
+        );
+        assert_eq!(
+            CardSet::from_cards(&[B3]).highest_card(),
+            CardSet::from_card(B3)
+        );
+        assert_eq!(
+            CardSet::from_cards(&[B1, B3, B5]).highest_card(),
+            CardSet::from_card(B5)
+        );
+        assert_eq!(
+            CardSet::from_cards(&[G1, G3, G5]).highest_card(),
+            CardSet::from_card(G5)
+        );
+        assert_eq!(
+            CardSet::from_cards(&[B8, B9, R1]).highest_card(),
+            CardSet::from_card(R1)
+        );
+        assert_eq!(
+            CardSet::from_cards(&[R1, R2, R3, R4]).highest_card(),
+            CardSet::from_card(R4)
+        );
+    }
+
+    #[test]
+    fn test_is_covered_by() {
+        assert!(CardSet::from_cards(&[B1]).is_covered_by(CardSet::from_cards(&[B1])));
+        assert!(CardSet::from_cards(&[B1]).is_covered_by(CardSet::from_cards(&[B1, Y2])));
+        assert!(CardSet::from_cards(&[B1, B3]).is_covered_by(CardSet::from_cards(&[B1, B2, B3])));
+        assert!(!CardSet::from_cards(&[B1, B3]).is_covered_by(CardSet::from_cards(&[B2, B3, B4])));
+        assert!(!CardSet::from_cards(&[B1, B3]).is_covered_by(CardSet::from_cards(&[G1, G3])));
+    }
+
+    #[test]
+    fn test_bitwise_ops() {
+        let x = CardSet::from_cards(&[B1, B3, B5]);
+        let y = CardSet::from_cards(&[B5, B7, B9]);
+        assert_eq!(x & y, CardSet::from_cards(&[B5]));
+        assert_eq!(x | y, CardSet::from_cards(&[B1, B3, B5, B7, B9]));
+
+        assert!(!x.contains(B2));
+        assert!(!x.contains(Y1));
+        assert!(!x.contains(G3));
+        assert!(!x.contains(M5));
+        assert!(!x.contains(R4));
     }
 }

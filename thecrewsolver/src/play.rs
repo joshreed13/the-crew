@@ -104,7 +104,7 @@ impl PositionCounter {
     }
 
     fn get_card(&self) -> CardSet {
-        CardSet::from_raw(self.position as u64)
+        CardSet::from_bit_index(self.position)
     }
 
     fn get_hand(&self) -> RawCardSet {
@@ -134,11 +134,10 @@ impl PositionCounter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::card::Card::*;
 
     #[test]
     fn test_get_trick_winner() {
-        use crate::card::Card::*;
-
         assert_eq!(
             Play {
                 cards: CardSet::from_cards(&[B8, B9, Y2]),
@@ -147,5 +146,86 @@ mod tests {
             .get_trick_winner(),
             CardSet::from_card(B9)
         );
+        assert_eq!(
+            Play {
+                cards: CardSet::from_cards(&[B8, B9, Y2]),
+                lead_suit: suit::YELLOW
+            }
+            .get_trick_winner(),
+            CardSet::from_card(Y2)
+        );
+        assert_eq!(
+            Play {
+                cards: CardSet::from_cards(&[B8, B9, Y2, R2]),
+                lead_suit: suit::BLUE
+            }
+            .get_trick_winner(),
+            CardSet::from_card(R2)
+        );
+        assert_eq!(
+            Play {
+                cards: CardSet::from_cards(&[B8, Y2, R2, R3]),
+                lead_suit: suit::BLUE
+            }
+            .get_trick_winner(),
+            CardSet::from_card(R3)
+        );
+        assert_eq!(
+            Play {
+                cards: CardSet::from_cards(&[B8, Y2, R3]),
+                lead_suit: suit::ROCKETS
+            }
+            .get_trick_winner(),
+            CardSet::from_card(R3)
+        );
+        assert_eq!(
+            Play {
+                cards: CardSet::from_cards(&[B1, Y9, M9, G9]),
+                lead_suit: suit::BLUE
+            }
+            .get_trick_winner(),
+            CardSet::from_card(B1)
+        );
+        assert_eq!(
+            Play {
+                cards: CardSet::from_cards(&[G1, G2, G3, G4]),
+                lead_suit: suit::GREEN
+            }
+            .get_trick_winner(),
+            CardSet::from_card(G4)
+        );
+    }
+
+    #[test]
+    fn test_position_counter() {
+        let cards = CardSet::from_cards(&[B3, B5, B9, Y2, G4, R1]);
+        let mut pc = PositionCounter::new(cards);
+
+        assert_eq!(pc.get_card(), CardSet::from_card(B3));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B5));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B9));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(Y2));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(G4));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(R1));
+        assert!(pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B3));
+
+        pc.reset_with_mask(suit::BLUE);
+        assert_eq!(pc.get_card(), CardSet::from_card(B3));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B5));
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B9));
+        assert!(pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B3));
+
+        assert!(!pc.increment());
+        assert_eq!(pc.get_card(), CardSet::from_card(B5));
+        assert_eq!(pc.get_hand(), cards.get_raw());
     }
 }
