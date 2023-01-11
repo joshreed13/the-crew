@@ -3,6 +3,7 @@ use crate::player::{PlayerIndex, NUM_PLAYERS};
 
 pub type Hands = [CardSet; NUM_PLAYERS];
 
+#[derive(Debug, PartialEq)]
 pub struct Play {
     cards: CardSet,
     lead_suit: CardSet,
@@ -23,6 +24,7 @@ impl Play {
 pub struct PlayGenerator {
     counters: [PositionCounter; NUM_PLAYERS],
     lead_suit: CardSet,
+    first_time: bool,
 }
 
 impl PlayGenerator {
@@ -30,6 +32,7 @@ impl PlayGenerator {
         let mut obj = PlayGenerator {
             counters: hands.map(PositionCounter::new),
             lead_suit: CardSet::EMPTY,
+            first_time: true,
         };
         obj.counters.rotate_left(lead_player as usize);
         obj.set_lead_suit();
@@ -69,6 +72,11 @@ impl Iterator for PlayGenerator {
     type Item = Play;
 
     fn next(&mut self) -> Option<Play> {
+        if self.first_time {
+            self.first_time = false;
+            return Some(self.get_play());
+        }
+
         for counter in &mut self.counters[1..].iter_mut().rev() {
             let overflowed = counter.increment();
             if !overflowed {
@@ -118,7 +126,7 @@ impl PositionCounter {
         self.hand = self.hand.rotate_right(next_step);
         self.mask = self.mask.rotate_right(next_step);
         self.position += next_step + 1;
-        let overflowed: bool = self.position > RawCardSet::BITS;
+        let overflowed: bool = self.position >= RawCardSet::BITS;
         self.position %= RawCardSet::BITS;
         overflowed
     }
@@ -227,5 +235,61 @@ mod tests {
         assert!(!pc.increment());
         assert_eq!(pc.get_card(), CardSet::from_card(B5));
         assert_eq!(pc.get_hand(), cards.get_raw());
+    }
+
+    #[test]
+    fn test_play_generator() {
+        let play = |suit, cards| Play {
+            cards: CardSet::from_cards(cards),
+            lead_suit: suit,
+        };
+
+        let hands: Hands = [
+            CardSet::from_cards(&[B1, M1, G1]),
+            CardSet::from_cards(&[B2, G2, R4]),
+            CardSet::from_cards(&[Y3, M3, G3]),
+            CardSet::from_cards(&[B4, B5, M4]),
+        ];
+
+        let expected = vec![
+            play(suit::BLUE, &[B1, B2, Y3, B4]),
+            play(suit::BLUE, &[B1, B2, Y3, B5]),
+            play(suit::BLUE, &[B1, B2, M3, B4]),
+            play(suit::BLUE, &[B1, B2, M3, B5]),
+            play(suit::BLUE, &[B1, B2, G3, B4]),
+            play(suit::BLUE, &[B1, B2, G3, B5]),
+            play(suit::MAGENTA, &[M1, B2, M3, M4]),
+            play(suit::MAGENTA, &[M1, G2, M3, M4]),
+            play(suit::MAGENTA, &[M1, R4, M3, M4]),
+            play(suit::GREEN, &[G1, G2, G3, B4]),
+            play(suit::GREEN, &[G1, G2, G3, B5]),
+            play(suit::GREEN, &[G1, G2, G3, M4]),
+        ];
+
+        let pg = PlayGenerator::new(&hands, 0);
+        assert_eq!(pg.take(26).collect::<Vec<Play>>(), expected);
+    }
+
+    #[test]
+    fn test_play_generator_different_leader() {
+        let play = |suit, cards| Play {
+            cards: CardSet::from_cards(cards),
+            lead_suit: suit,
+        };
+
+        let hands: Hands = [
+            CardSet::from_cards(&[B1, Y1]),
+            CardSet::from_cards(&[B2, Y2]),
+            CardSet::from_cards(&[Y3, Y7]),
+            CardSet::from_cards(&[B4, Y4]),
+        ];
+
+        let expected = vec![
+            play(suit::YELLOW, &[Y1, Y2, Y3, Y4]),
+            play(suit::YELLOW, &[Y1, Y2, Y7, Y4]),
+        ];
+
+        let pg = PlayGenerator::new(&hands, 2);
+        assert_eq!(pg.take(26).collect::<Vec<Play>>(), expected);
     }
 }
