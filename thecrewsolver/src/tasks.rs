@@ -1,20 +1,19 @@
-use crate::card::{card_at_position, CardIndex, CardSet};
+use crate::card::{Card, CardSet};
 use crate::player::PlayerIndex;
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 pub struct Task {
     player: PlayerIndex,
-    card: CardIndex,
+    card: Card,
 }
 
 impl Task {
-    pub fn new(player: PlayerIndex, card: CardIndex) -> Task {
+    pub fn new(player: PlayerIndex, card: Card) -> Task {
         Task { player, card }
     }
 
     fn matches(&self, play: CardSet) -> bool {
-        let card: CardSet = 1 << self.card;
-        play & card != 0
+        play.contains(self.card)
     }
 
     fn evaluate(&self, play: CardSet, winner: PlayerIndex) -> TaskEvaluation {
@@ -80,7 +79,7 @@ impl TasksObjective {
 
     fn last_is_covered_by(&self, cards: CardSet) -> bool {
         match &self.last_task {
-            Some(task) => card_at_position(task.card) & !cards == 0,
+            Some(task) => cards.contains(task.card),
             None => true,
         }
     }
@@ -110,18 +109,20 @@ enum TaskEvaluation {
     Complete,
 }
 
+const TASK_LIST_LENGTH: usize = 12;
+
 pub struct TaskList {
     mask: CardSet,
-    tasks: [Task; 12],
+    tasks: [Task; TASK_LIST_LENGTH],
 }
 
 impl TaskList {
     fn is_complete(&self) -> bool {
-        self.mask == 0
+        self.mask == CardSet::EMPTY
     }
 
     fn covered_by(&self, cards: CardSet) -> bool {
-        self.mask & !cards == 0
+        self.mask.is_covered_by(cards)
     }
 
     fn check_completed_front(&self, play: CardSet, winner: PlayerIndex) -> Option<TaskList> {
@@ -184,8 +185,8 @@ impl TaskListBuilder {
         TaskListBuilder {
             i: 0,
             list: TaskList {
-                mask: 0,
-                tasks: Default::default(),
+                mask: CardSet::EMPTY,
+                tasks: [Task::new(0, Card::B1); TASK_LIST_LENGTH],
             },
         }
     }
@@ -199,7 +200,7 @@ impl TaskListBuilder {
     }
 
     pub fn push(&mut self, task: Task) {
-        self.list.mask |= card_at_position(task.card);
+        self.list.mask.add(CardSet::from_card(task.card));
         self.list.tasks[self.i] = task;
         self.i += 1;
     }

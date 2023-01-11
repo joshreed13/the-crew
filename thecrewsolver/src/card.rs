@@ -1,148 +1,210 @@
-pub type CardSet = u64;
-pub type CardIndex = u8;
+use std::ops::{BitAnd, BitOr, Not};
+
+#[repr(u8)]
+#[derive(Copy, Clone)]
+pub enum Card {
+    B1 = 0,
+    B2,
+    B3,
+    B4,
+    B5,
+    B6,
+    B7,
+    B8,
+    B9,
+
+    Y1,
+    Y2,
+    Y3,
+    Y4,
+    Y5,
+    Y6,
+    Y7,
+    Y8,
+    Y9,
+
+    M1,
+    M2,
+    M3,
+    M4,
+    M5,
+    M6,
+    M7,
+    M8,
+    M9,
+
+    G1,
+    G2,
+    G3,
+    G4,
+    G5,
+    G6,
+    G7,
+    G8,
+    G9,
+
+    R1,
+    R2,
+    R3,
+    R4,
+}
+
+pub type RawCardSet = u64;
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct CardSet(RawCardSet);
+
+impl CardSet {
+    pub const EMPTY: Self = CardSet(0);
+    pub const EVERYTHING: Self = CardSet(RawCardSet::MAX);
+
+    pub const fn from_card(card: Card) -> Self {
+        CardSet(1 << (card as u8))
+    }
+
+    fn from_value(value: u32) -> Self {
+        CardSet(1 << value)
+    }
+
+    pub fn from_cards(cards: &[Card]) -> Self {
+        cards
+            .iter()
+            .map(|c| CardSet::from_card(*c))
+            .fold(CardSet::EMPTY, |a, c| a.add(c))
+    }
+
+    pub fn from_raw(raw: RawCardSet) -> Self {
+        CardSet(raw)
+    }
+
+    pub fn add(&self, cards: Self) -> Self {
+        CardSet(self.0 | cards.0)
+    }
+
+    pub fn contains(&self, card: Card) -> bool {
+        self.overlaps_with(Self::from_card(card))
+    }
+
+    pub fn overlaps_with(&self, cards: CardSet) -> bool {
+        *self & cards != Self::EMPTY
+    }
+
+    pub fn get_raw(&self) -> RawCardSet {
+        self.0
+    }
+
+    pub fn get_suit(&self) -> Self {
+        if self.0 & suit::BLUE.0 != 0 {
+            suit::BLUE
+        } else if self.0 & suit::YELLOW.0 != 0 {
+            suit::YELLOW
+        } else if self.0 & suit::MAGENTA.0 != 0 {
+            suit::MAGENTA
+        } else if self.0 & suit::GREEN.0 != 0 {
+            suit::GREEN
+        } else if self.0 & suit::ROCKETS.0 != 0 {
+            suit::ROCKETS
+        } else {
+            CardSet::EMPTY
+        }
+    }
+
+    pub fn highest_card(&self) -> Self {
+        Self::from_value(RawCardSet::BITS - self.0.leading_zeros())
+    }
+
+    pub fn is_covered_by(&self, cover: CardSet) -> bool {
+        *self & !cover == Self::EMPTY
+    }
+
+    const fn from_constant(cards: &[Card]) -> Self {
+        match cards {
+            [head, tail @ ..] => Self(Self::from_constant(tail).0 | Self::from_card(*head).0),
+            _ => Self::EMPTY,
+        }
+    }
+}
+
+impl BitAnd for CardSet {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Self(self.0 & rhs.0)
+    }
+}
+
+impl BitOr for CardSet {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Self(self.0 | rhs.0)
+    }
+}
+
+impl Not for CardSet {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        Self(!self.0)
+    }
+}
 
 pub mod suit {
+    use super::Card::*;
     use super::CardSet;
 
-    pub const BLUE: CardSet = 0b111111111;
-    pub const YELLOW: CardSet = 0b111111111 << 9;
-    pub const MAGENTA: CardSet = 0b111111111 << 18;
-    pub const GREEN: CardSet = 0b111111111 << 27;
-    pub const ROCKETS: CardSet = 0b1111 << 36;
-}
-
-pub mod cards {
-    use super::CardIndex;
-
-    pub const B1: CardIndex = 0;
-    pub const B2: CardIndex = 1;
-    pub const B3: CardIndex = 2;
-    pub const B4: CardIndex = 3;
-    pub const B5: CardIndex = 4;
-    pub const B6: CardIndex = 5;
-    pub const B7: CardIndex = 6;
-    pub const B8: CardIndex = 7;
-    pub const B9: CardIndex = 8;
-
-    pub const Y1: CardIndex = 9;
-    pub const Y2: CardIndex = 10;
-    pub const Y3: CardIndex = 11;
-    pub const Y4: CardIndex = 12;
-    pub const Y5: CardIndex = 13;
-    pub const Y6: CardIndex = 14;
-    pub const Y7: CardIndex = 15;
-    pub const Y8: CardIndex = 16;
-    pub const Y9: CardIndex = 17;
-
-    pub const M1: CardIndex = 18;
-    pub const M2: CardIndex = 19;
-    pub const M3: CardIndex = 20;
-    pub const M4: CardIndex = 21;
-    pub const M5: CardIndex = 22;
-    pub const M6: CardIndex = 23;
-    pub const M7: CardIndex = 24;
-    pub const M8: CardIndex = 25;
-    pub const M9: CardIndex = 26;
-
-    pub const G1: CardIndex = 27;
-    pub const G2: CardIndex = 28;
-    pub const G3: CardIndex = 29;
-    pub const G4: CardIndex = 30;
-    pub const G5: CardIndex = 31;
-    pub const G6: CardIndex = 32;
-    pub const G7: CardIndex = 33;
-    pub const G8: CardIndex = 34;
-    pub const G9: CardIndex = 35;
-
-    pub const R1: CardIndex = 36;
-    pub const R2: CardIndex = 37;
-    pub const R3: CardIndex = 38;
-    pub const R4: CardIndex = 39;
-}
-
-pub fn card_at_position(index: CardIndex) -> CardSet {
-    1 << index
-}
-
-pub fn card_list_to_set(cards: &[CardIndex]) -> CardSet {
-    cards.iter().fold(0, |a, c| a | card_at_position(*c))
-}
-
-pub fn get_suit(card: CardSet) -> CardSet {
-    if card & suit::BLUE != 0 {
-        suit::BLUE
-    } else if card & suit::YELLOW != 0 {
-        suit::YELLOW
-    } else if card & suit::MAGENTA != 0 {
-        suit::MAGENTA
-    } else if card & suit::GREEN != 0 {
-        suit::GREEN
-    } else if card & suit::ROCKETS != 0 {
-        suit::ROCKETS
-    } else {
-        0
-    }
+    pub const BLUE: CardSet = CardSet::from_constant(&[B1, B2, B3, B4, B5, B6, B7, B8, B9]);
+    pub const YELLOW: CardSet = CardSet::from_constant(&[Y1, Y2, Y3, Y4, Y5, Y6, Y7, Y8, Y9]);
+    pub const MAGENTA: CardSet = CardSet::from_constant(&[M1, M2, M3, M4, M5, M6, M7, M8, M9]);
+    pub const GREEN: CardSet = CardSet::from_constant(&[G1, G2, G3, G4, G5, G6, G7, G8, G9]);
+    pub const ROCKETS: CardSet = CardSet::from_constant(&[R1, R2, R3, R4]);
 }
 
 #[cfg(test)]
 mod tests {
+    use super::Card::*;
     use super::*;
 
     #[test]
-    fn test_suits() {
-        use super::cards::*;
-
-        assert_eq!(
-            card_list_to_set(&[B1, B2, B3, B4, B5, B6, B7, B8, B9]),
-            suit::BLUE
-        );
-        assert_eq!(
-            card_list_to_set(&[Y1, Y2, Y3, Y4, Y5, Y6, Y7, Y8, Y9]),
-            suit::YELLOW
-        );
-        assert_eq!(
-            card_list_to_set(&[M1, M2, M3, M4, M5, M6, M7, M8, M9]),
-            suit::MAGENTA
-        );
-        assert_eq!(
-            card_list_to_set(&[G1, G2, G3, G4, G5, G6, G7, G8, G9]),
-            suit::GREEN
-        );
-        assert_eq!(card_list_to_set(&[R1, R2, R3, R4]), suit::ROCKETS);
+    fn test_constants() {
+        assert_eq!(CardSet::EMPTY.0, 0);
     }
 
     #[test]
-    fn test_card_at_position() {
-        assert_eq!(card_at_position(0), 0b1);
-        assert_eq!(card_at_position(1), 0b10);
-        assert_eq!(card_at_position(2), 0b100);
-        assert_eq!(card_at_position(3), 0b1000);
+    fn test_from_card() {
+        assert_eq!(CardSet::from_card(B1).0, 0b1);
+        assert_eq!(CardSet::from_card(B2).0, 0b10);
+        assert_eq!(CardSet::from_card(B3).0, 0b100);
+        assert_eq!(CardSet::from_card(B4).0, 0b1000);
     }
 
     #[test]
-    fn test_card_list_to_set() {
-        assert_eq!(card_list_to_set(&[0, 2, 4]), 0b10101);
+    fn test_from_cards() {
+        assert_eq!(CardSet::from_cards(&[B1, B3, B5]).0, 0b10101);
+    }
+
+    #[test]
+    fn test_add() {
+        assert_eq!(CardSet::from_card(B1).add(CardSet::from_card(B3)).0, 0b101);
     }
 
     #[test]
     fn test_get_suit() {
-        use super::cards::*;
-        assert_eq!(get_suit(card_at_position(B1)), suit::BLUE);
-        assert_eq!(get_suit(card_at_position(B4)), suit::BLUE);
-        assert_eq!(get_suit(card_at_position(B9)), suit::BLUE);
-        assert_eq!(get_suit(card_at_position(Y1)), suit::YELLOW);
-        assert_eq!(get_suit(card_at_position(Y4)), suit::YELLOW);
-        assert_eq!(get_suit(card_at_position(Y9)), suit::YELLOW);
-        assert_eq!(get_suit(card_at_position(M1)), suit::MAGENTA);
-        assert_eq!(get_suit(card_at_position(M4)), suit::MAGENTA);
-        assert_eq!(get_suit(card_at_position(M9)), suit::MAGENTA);
-        assert_eq!(get_suit(card_at_position(G1)), suit::GREEN);
-        assert_eq!(get_suit(card_at_position(G4)), suit::GREEN);
-        assert_eq!(get_suit(card_at_position(G9)), suit::GREEN);
-        assert_eq!(get_suit(card_at_position(R1)), suit::ROCKETS);
-        assert_eq!(get_suit(card_at_position(R2)), suit::ROCKETS);
-        assert_eq!(get_suit(card_at_position(R3)), suit::ROCKETS);
-        assert_eq!(get_suit(card_at_position(R4)), suit::ROCKETS);
-        assert_eq!(get_suit(card_at_position(50)), 0);
+        assert_eq!(CardSet::from_card(B1).get_suit(), suit::BLUE);
+        assert_eq!(CardSet::from_card(B4).get_suit(), suit::BLUE);
+        assert_eq!(CardSet::from_card(B9).get_suit(), suit::BLUE);
+        assert_eq!(CardSet::from_card(Y1).get_suit(), suit::YELLOW);
+        assert_eq!(CardSet::from_card(Y4).get_suit(), suit::YELLOW);
+        assert_eq!(CardSet::from_card(Y9).get_suit(), suit::YELLOW);
+        assert_eq!(CardSet::from_card(M1).get_suit(), suit::MAGENTA);
+        assert_eq!(CardSet::from_card(M4).get_suit(), suit::MAGENTA);
+        assert_eq!(CardSet::from_card(M9).get_suit(), suit::MAGENTA);
+        assert_eq!(CardSet::from_card(G1).get_suit(), suit::GREEN);
+        assert_eq!(CardSet::from_card(G4).get_suit(), suit::GREEN);
+        assert_eq!(CardSet::from_card(G9).get_suit(), suit::GREEN);
+        assert_eq!(CardSet::from_card(R1).get_suit(), suit::ROCKETS);
+        assert_eq!(CardSet::from_card(R2).get_suit(), suit::ROCKETS);
+        assert_eq!(CardSet::from_card(R3).get_suit(), suit::ROCKETS);
+        assert_eq!(CardSet::from_card(R4).get_suit(), suit::ROCKETS);
     }
 }

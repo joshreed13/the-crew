@@ -1,4 +1,4 @@
-use crate::card::{CardIndex, CardSet};
+use crate::card::CardSet;
 use crate::play::{Hands, Play, PlayGenerator};
 use crate::player::PlayerIndex;
 use crate::tasks::TasksObjective;
@@ -50,10 +50,10 @@ fn solve_play(state: &GameState, play: &Play) -> bool {
     }
 }
 
-fn find_player_with_card(hands: &Hands, card: CardSet) -> Option<CardIndex> {
+fn find_player_with_card(hands: &Hands, card: CardSet) -> Option<PlayerIndex> {
     for (i, hand) in hands.iter().enumerate() {
-        if hand & card != 0 {
-            return Some(i as CardIndex);
+        if hand.overlaps_with(card) {
+            return Some(i as PlayerIndex);
         }
     }
     None
