@@ -1,7 +1,7 @@
 use std::ops::{BitAnd, BitOr, Not};
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Card {
     B1 = 0,
     B2,
@@ -115,6 +115,10 @@ impl CardSet {
 
     pub fn is_covered_by(&self, cover: CardSet) -> bool {
         *self & !cover == Self::EMPTY
+    }
+
+    pub fn num_set(&self) -> u32 {
+        self.0.count_ones()
     }
 
     const fn from_constant(cards: &[Card]) -> Self {
@@ -283,6 +287,15 @@ mod tests {
         assert!(CardSet::from_cards(&[B1, B3]).is_covered_by(CardSet::from_cards(&[B1, B2, B3])));
         assert!(!CardSet::from_cards(&[B1, B3]).is_covered_by(CardSet::from_cards(&[B2, B3, B4])));
         assert!(!CardSet::from_cards(&[B1, B3]).is_covered_by(CardSet::from_cards(&[G1, G3])));
+    }
+
+    #[test]
+    fn test_num_set() {
+        assert_eq!(CardSet::EMPTY.num_set(), 0);
+        assert_eq!(CardSet::from_cards(&[]).num_set(), 0);
+        assert_eq!(CardSet::from_cards(&[B1]).num_set(), 1);
+        assert_eq!(CardSet::from_cards(&[B1, G7]).num_set(), 2);
+        assert_eq!(CardSet::from_cards(&[B1, G7, Y3, R2, M1]).num_set(), 5);
     }
 
     #[test]

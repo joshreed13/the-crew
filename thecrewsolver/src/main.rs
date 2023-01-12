@@ -7,7 +7,7 @@ mod tasks;
 use crate::card::CardSet;
 use crate::play::Hands;
 use crate::solver::{solve, GameState};
-use crate::tasks::{Task, TaskListBuilder, TasksObjective};
+use crate::tasks::{Task, TasksObjective};
 
 fn main() {
     use card::Card::*;
@@ -18,9 +18,9 @@ fn main() {
         CardSet::from_cards(&[R2, Y8, Y1, B6, B2, R1, G6, B8, G4, G2]),
     ];
     let tasks = TasksObjective::new(
-        TaskListBuilder::from_list(&[Task::new(0, B8)]).done(),
-        TaskListBuilder::from_list(&[]).done(),
-        TaskListBuilder::from_list(&[Task::new(1, G7), Task::new(2, M5), Task::new(3, Y4)]).done(),
+        &[Task::new(0, B8)],
+        &[],
+        &[Task::new(1, G7), Task::new(2, M5), Task::new(3, Y4)],
         None,
     );
 
