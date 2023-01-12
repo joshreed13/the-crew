@@ -72,6 +72,10 @@ impl Iterator for PlayGenerator {
     type Item = Play;
 
     fn next(&mut self) -> Option<Play> {
+        if self.counters[0].is_empty() {
+            return None;
+        }
+
         if self.first_time {
             self.first_time = false;
             return Some(self.get_play());
@@ -103,12 +107,16 @@ struct PositionCounter {
 impl PositionCounter {
     fn new(hand: CardSet) -> PositionCounter {
         let raw_hand = hand.get_raw();
-        let initial_pos = raw_hand.trailing_zeros();
+        let initial_pos = raw_hand.trailing_zeros() % RawCardSet::BITS;
         PositionCounter {
             hand: raw_hand.rotate_right(initial_pos),
             mask: RawCardSet::MAX,
             position: initial_pos,
         }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.hand == 0
     }
 
     fn get_card(&self) -> CardSet {
@@ -238,6 +246,12 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_position_counter() {
+        let mut pc = PositionCounter::new(CardSet::EMPTY);
+        assert!(pc.increment());
+    }
+
+    #[test]
     fn test_play_generator() {
         let play = |suit, cards| Play {
             cards: CardSet::from_cards(cards),
@@ -267,7 +281,7 @@ mod tests {
         ];
 
         let pg = PlayGenerator::new(&hands, 0);
-        assert_eq!(pg.take(26).collect::<Vec<Play>>(), expected);
+        assert_eq!(pg.collect::<Vec<Play>>(), expected);
     }
 
     #[test]
@@ -290,6 +304,21 @@ mod tests {
         ];
 
         let pg = PlayGenerator::new(&hands, 2);
-        assert_eq!(pg.take(26).collect::<Vec<Play>>(), expected);
+        assert_eq!(pg.collect::<Vec<Play>>(), expected);
+    }
+
+    #[test]
+    fn test_empty_play_generator() {
+        let hands: Hands = [
+            CardSet::EMPTY,
+            CardSet::EMPTY,
+            CardSet::EMPTY,
+            CardSet::EMPTY,
+        ];
+
+        let expected = vec![];
+
+        let pg = PlayGenerator::new(&hands, 0);
+        assert_eq!(pg.collect::<Vec<Play>>(), expected);
     }
 }
