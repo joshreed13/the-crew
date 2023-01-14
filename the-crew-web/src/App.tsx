@@ -10,13 +10,16 @@ import {
 } from "react-router-dom"
 import './App.css';
 import ControlPanel from './ControlPanel';
+import { Card } from './model';
+
+const mycard: Card = {suit: "B", value: 1};
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={< Root />} errorElement={<ErrorPage />}>
+    <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
       <Route errorElement={<ErrorPage />}>
         <Route index element={<IndexPage />} />
-        <Route path="controlpanel/" element={<ControlPanel />} />
+        <Route path="controlpanel/" element={<ControlPanel card={mycard} />} />
       </Route>
     </Route >
   )
