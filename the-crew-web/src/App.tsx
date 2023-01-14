@@ -12,14 +12,20 @@ import './App.css';
 import ControlPanel from './ControlPanel';
 import { Card } from './model';
 
-const mycard: Card = {suit: "B", value: 1};
+const mycards: Card[] = [
+  { suit: "B", value: 1 },
+  { suit: "Y", value: 3 },
+  { suit: "M", value: 6 },
+  { suit: "G", value: 9 },
+  { suit: "R", value: 4 }
+];
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
       <Route errorElement={<ErrorPage />}>
         <Route index element={<IndexPage />} />
-        <Route path="controlpanel/" element={<ControlPanel card={mycard} />} />
+        <Route path="controlpanel/" element={<ControlPanel cards={mycards} />} />
       </Route>
     </Route >
   )
@@ -40,9 +46,6 @@ function Root() {
           <ul>
             <li>
               <Link to={`/controlpanel/`}>Control Panel</Link>
-            </li>
-            <li>
-              <Link to={`/contacts/2`}>Your Friend</Link>
             </li>
           </ul>
         </nav>
