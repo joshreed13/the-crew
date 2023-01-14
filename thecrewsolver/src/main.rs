@@ -8,6 +8,7 @@ use crate::card::CardSet;
 use crate::play::Hands;
 use crate::solver::{solve, GameState};
 use crate::tasks::{Task, TasksObjective};
+use std::time::Instant;
 
 fn main() {
     use card::Card::*;
@@ -25,6 +26,8 @@ fn main() {
     );
 
     println!("Calculating...");
+    let start = Instant::now();
     let result = solve(&GameState::new(hands, tasks, 0));
-    println!("{}", result);
+    let duration = start.elapsed();
+    println!("{} in {:?}", result, duration);
 }

@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "rust: cargo build",
+			"type": "cargo",
+			"command": "build",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"options": {
+				"cwd": "${workspaceFolder}/thecrewsolver"
+			}
+		},
+		{
+			"label": "rust: cargo run (release)",
+			"type": "cargo",
+			"command": "run",
+			"args": [
+				"--release"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"options": {
+				"cwd": "${workspaceFolder}/thecrewsolver"
+			}
+		}
+	]
+}
