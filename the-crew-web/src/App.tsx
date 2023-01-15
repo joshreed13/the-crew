@@ -10,22 +10,50 @@ import {
 } from "react-router-dom"
 import './App.css';
 import ControlPanel from './ControlPanel';
-import { Card } from './model';
+import { Card, RoundState, User } from './model';
 
-const mycards: Card[] = [
-  { suit: "B", value: 1 },
-  { suit: "Y", value: 3 },
-  { suit: "M", value: 6 },
-  { suit: "G", value: 9 },
-  { suit: "R", value: 4 }
-];
+const myuser: User = {
+  id: 0,
+  name: "Test",
+  isCommander: false
+};
+
+const mystate: RoundState = {
+  users: [],
+  hands: [
+    {
+      user: myuser,
+      cards: [
+        { suit: "B", value: 1 },
+        { suit: "Y", value: 3 },
+        { suit: "M", value: 6 },
+        { suit: "G", value: 9 },
+        { suit: "R", value: 4 }
+      ]
+    },
+    {
+      user: myuser,
+      cards: [
+        { suit: "B", value: 2 },
+        { suit: "B", value: 3 },
+        { suit: "Y", value: 2 },
+        { suit: "M", value: 3 },
+        { suit: "M", value: 4 }
+      ]
+    }
+  ],
+  taskObjectives: {
+    tasks: []
+  },
+  tricks: []
+}
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
       <Route errorElement={<ErrorPage />}>
         <Route index element={<IndexPage />} />
-        <Route path="controlpanel/" element={<ControlPanel cards={mycards} />} />
+        <Route path="controlpanel/" element={<ControlPanel round={mystate} />} />
       </Route>
     </Route >
   )

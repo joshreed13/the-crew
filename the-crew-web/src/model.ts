@@ -13,9 +13,11 @@ export type User = {
     left?: UserId;
     right?: UserId;
     isCommander: boolean;
+    hand: Hand[];
 };
 
 export type Hand = {
+    user: User;
     cards: Card[];
 };
 
