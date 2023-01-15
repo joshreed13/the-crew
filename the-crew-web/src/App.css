@@ -32,7 +32,16 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+.bordered {
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  padding: 5px;
+  display: inline-block;
 }

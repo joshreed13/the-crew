@@ -9,43 +9,79 @@ import {
   Link,
 } from "react-router-dom"
 import './App.css';
-import ControlPanel from './ControlPanel';
-import { Card, RoundState, User } from './model';
+import { AppState, Card, Player, Task, Trick } from './model';
+import HandPage from './pages/Hand';
+import ObjectivesPage from './pages/Objectives';
+import TricksPage from './pages/Tricks';
+import ControlPanel from './pages/ControlPanel';
 
-const myuser: User = {
-  id: 0,
-  name: "Test",
+const player1: Player = {
+  name: "John",
+  isCommander: true
+};
+
+const player2: Player = {
+  name: "Sally",
   isCommander: false
 };
 
-const mystate: RoundState = {
-  users: [],
-  hands: [
-    {
-      user: myuser,
-      cards: [
-        { suit: "B", value: 1 },
-        { suit: "Y", value: 3 },
-        { suit: "M", value: 6 },
-        { suit: "G", value: 9 },
-        { suit: "R", value: 4 }
-      ]
-    },
-    {
-      user: myuser,
-      cards: [
-        { suit: "B", value: 2 },
-        { suit: "B", value: 3 },
-        { suit: "Y", value: 2 },
-        { suit: "M", value: 3 },
-        { suit: "M", value: 4 }
-      ]
-    }
-  ],
-  taskObjectives: {
-    tasks: []
+const hand1: Card[] = [
+  { suit: "B", value: 1 },
+  { suit: "Y", value: 3 },
+  { suit: "M", value: 6 },
+  { suit: "G", value: 9 },
+  { suit: "R", value: 4 }
+];
+
+const task1: Task = {
+  id: "a",
+  type: "absolute",
+  order: 1,
+  card: { suit: "G", value: 4 },
+  player: {
+    name: "John",
+    isCommander: true
+  }
+};
+
+const tricks: Trick[] = [{
+  turns: [{
+    player: player1,
+    card: { suit: "Y", value: 3 },
+    isLeader: true,
+    isWinner: false,
+    isNextToPlay: false,
+  }, {
+    player: player2,
+    card: { suit: "B", value: 9 },
+    isLeader: false,
+    isWinner: false,
+    isNextToPlay: false,
+  }]
+}];
+
+const mystate: AppState = {
+  handPage: {
+    heldCards: hand1
   },
-  tricks: []
+  objectivePage: {
+    tasks: [task1]
+  },
+  tricksPage: {
+    tricks: tricks
+  },
+  controlPanel: {
+    players: [{
+      player: player1,
+      hand: hand1,
+      tasks: [task1],
+    }, {
+      player: player2,
+      hand: hand1,
+      tasks: [],
+    }],
+    tricks: tricks
+  },
 }
 
 const router = createBrowserRouter(
@@ -53,7 +89,10 @@ const router = createBrowserRouter(
     <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
       <Route errorElement={<ErrorPage />}>
         <Route index element={<IndexPage />} />
-        <Route path="controlpanel/" element={<ControlPanel round={mystate} />} />
+        <Route path="hand/" element={<HandPage state={mystate.handPage} />} />
+        <Route path="objectives/" element={<ObjectivesPage state={mystate.objectivePage} />} />
+        <Route path="tricks/" element={<TricksPage state={mystate.tricksPage} />} />
+        <Route path="controlpanel/" element={<ControlPanel state={mystate.controlPanel} />} />
       </Route>
     </Route >
   )
@@ -69,9 +108,18 @@ function Root() {
   return (
     <>
       <div id="sidebar">
-        <h1>🚀</h1>
+        <Link to={`/`}><h1>🚀</h1></Link>
         <nav>
           <ul>
+            <li>
+              <Link to={`/hand/`}>Hand</Link>
+            </li>
+            <li>
+              <Link to={`/objectives/`}>Objectives</Link>
+            </li>
+            <li>
+              <Link to={`/tricks/`}>Tricks</Link>
+            </li>
             <li>
               <Link to={`/controlpanel/`}>Control Panel</Link>
             </li>

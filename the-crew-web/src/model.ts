@@ -1,47 +1,56 @@
-export type RoundState = {
-    users: User[];
-    hands: Hand[];
-    taskObjectives: TaskObjective;
+export type AppState = {
+    handPage: HandPageState;
+    objectivePage: ObjectivePageState;
+    tricksPage: TricksPageState;
+    controlPanel: ControlPanelState;
+};
+
+export type HandPageState = {
+    heldCards: Card[];
+};
+
+export type ObjectivePageState = {
+    tasks: Task[];
+};
+
+export type TricksPageState = {
     tricks: Trick[];
 };
 
-type UserId = number;
+export type ControlPanelState = {
+    players: PlayerState[];
+    tricks: Trick[];
+}
 
-export type User = {
-    id: UserId;
-    name?: string;
-    left?: UserId;
-    right?: UserId;
-    isCommander: boolean;
-    hand: Hand[];
-};
-
-export type Hand = {
-    user: User;
-    cards: Card[];
-};
-
-export type TaskObjective = {
+export type PlayerState = {
+    player: Player;
+    hand: Card[];
     tasks: Task[];
 };
 
 export type Task = {
-    id: number;
+    id: string;
     type: string;
-    index: number;
+    order: number;
     card?: Card;
+    player?: Player;
 };
 
 export type Trick = {
-    leader: UserId;
-    index: number;
-    plays: Play[];
+    turns: Turn[];
 };
 
-export type Play = {
-    user: UserId;
+export type Turn = {
+    player: Player;
     card?: Card;
-    winner: boolean;
+    isLeader: boolean;
+    isWinner: boolean;
+    isNextToPlay: boolean;
+};
+
+export type Player = {
+    name: string;
+    isCommander: boolean;
 };
 
 export type Card = {
