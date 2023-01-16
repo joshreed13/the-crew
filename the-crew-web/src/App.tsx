@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  RouterProvider,
   useRouteError,
+  Routes,
   Route,
   Outlet,
   Link,
@@ -84,24 +82,27 @@ const mystate: AppState = {
   },
 }
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
-      <Route errorElement={<ErrorPage />}>
-        <Route index element={<IndexPage />} />
-        <Route path="hand/" element={<HandPage state={mystate.handPage} />} />
-        <Route path="objectives/" element={<ObjectivesPage state={mystate.objectivePage} />} />
-        <Route path="tricks/" element={<TricksPage state={mystate.tricksPage} />} />
-        <Route path="controlpanel/" element={<ControlPanel state={mystate.controlPanel} />} />
-      </Route>
-    </Route >
-  )
-);
+class App extends React.Component<{}, AppState> {
+  constructor(props: any) {
+    super(props);
+    this.state = mystate;
+  }
 
-function App() {
-  return (
-    <RouterProvider router={router} />
-  );
+  render() {
+    return (
+      <Routes>
+        <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+          <Route errorElement={<ErrorPage />}>
+            <Route index element={<IndexPage />} />
+            <Route path="hand/" element={<HandPage state={this.state.handPage} />} />
+            <Route path="objectives/" element={<ObjectivesPage state={this.state.objectivePage} />} />
+            <Route path="tricks/" element={<TricksPage state={this.state.tricksPage} />} />
+            <Route path="controlpanel/" element={<ControlPanel state={this.state.controlPanel} />} />
+          </Route>
+        </Route>
+      </Routes>
+    );
+  }
 }
 
 function Root() {
