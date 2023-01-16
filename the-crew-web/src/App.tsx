@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   useRouteError,
   Routes,
@@ -6,6 +6,7 @@ import {
   Outlet,
   Link,
 } from "react-router-dom"
+import io, { Socket } from 'socket.io-client'
 import './App.css';
 import { AppState, Card, Player, Task, Trick } from './model';
 import HandPage from './pages/Hand';
@@ -13,34 +14,72 @@ import ObjectivesPage from './pages/Objectives';
 import TricksPage from './pages/Tricks';
 import ControlPanel from './pages/ControlPanel';
 
-class App extends React.Component<{}, AppState> {
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      handPage: { heldCards: [] },
-      objectivePage: { tasks: [] },
-      tricksPage: { tricks: [] },
-      controlPanel: { players: [], tricks: [] },
+interface ServerToClientEvents {
+  "pong": () => void;
+}
+
+interface ClientToServerEvents {
+  "ping": () => void;
+}
+
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({ transports: ["websocket"] });
+
+function App() {
+  const [data, setData] = useState({
+    handPage: { heldCards: [] },
+    objectivePage: { tasks: [] },
+    tricksPage: { tricks: [] },
+    controlPanel: { players: [], tricks: [] },
+  });
+
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [lastPong, setLastPong] = useState<string | null>(null);
+  useEffect(() => {
+    socket.on("connect", () => {
+      setIsConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    socket.on("pong", () => {
+      setLastPong(new Date().toISOString());
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("pong");
     };
+  }, []);
 
-    fetch('/api/appstate').then(async (response) => this.setState(await response.json() as AppState));
-  }
+  const sendPing = () => {
+    socket.emit("ping");
+  };
 
-  render() {
-    return (
-      <Routes>
-        <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
-          <Route errorElement={<ErrorPage />}>
-            <Route index element={<IndexPage />} />
-            <Route path="hand/" element={<HandPage data={this.state.handPage} />} />
-            <Route path="objectives/" element={<ObjectivesPage data={this.state.objectivePage} />} />
-            <Route path="tricks/" element={<TricksPage data={this.state.tricksPage} />} />
-            <Route path="controlpanel/" element={<ControlPanel data={this.state.controlPanel} />} />
-          </Route>
+  return (
+    <div>
+      <p>{isConnected ? "Connected" : "Disconnected"}</p>
+      <p>{lastPong}</p>
+      <button onClick={sendPing}>Send ping</button>
+    </div>
+  );
+  /*
+  return (
+    <Routes>
+      <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+        <Route errorElement={<ErrorPage />}>
+          <Route index element={<IndexPage />} />
+          <Route path="hand/" element={<HandPage data={data.handPage} />} />
+          <Route path="objectives/" element={<ObjectivesPage data={data.objectivePage} />} />
+          <Route path="tricks/" element={<TricksPage data={data.tricksPage} />} />
+          <Route path="controlpanel/" element={<ControlPanel data={data.controlPanel} />} />
         </Route>
-      </Routes>
-    );
-  }
+      </Route>
+    </Routes>
+  );
+  */
 }
 
 function Root() {

@@ -1,8 +1,12 @@
 from flask import Flask, request, Response, jsonify
 import werkzeug.exceptions
+from flask_socketio import SocketIO, emit
 from model import *
 
 app = Flask(__name__)
+# app.config['SECRET_KEY'] = "secret!"
+socketio = SocketIO(app, async_mode='threading')
+# logger=True, engineio_logger=True
 
 TASKID = 1
 STATE: RoundState = RoundState(
@@ -17,8 +21,44 @@ STATE: RoundState = RoundState(
 )
 
 
+@socketio.on('connect')
+def handle_connect(auth):
+    print("Saw connection!")
+
+
+@socketio.on('ping')
+def handle_ping():
+    print("Ping message!")
+    emit("pong")
+
+
+def publishUpdate():
+    socketio.emit("appstate", buildStateJson())
+
+
+@app.route("/api/test")
+def index():
+    #    return """<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    # <script type="text/javascript" charset="utf-8">
+    # var socket = io({ transports: ["websocket"] });
+    # </script></head><body>Hi</body></html>"""
+    return """<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io({ transports: ["websocket"] });
+    socket.on('connect', function() {
+        //socket.emit('my event', {data: 'I\\'m connected!'});
+        document.write("Connected!!!");
+        console.log("Connected!!!");
+    });
+</script></head><body>Hi</body></html>"""
+
+
 @app.route("/api/appstate", methods=['GET'])
 def get_state():
+    return jsonify(buildStateJson())
+
+
+def buildStateJson():
     selectedPlayer = 0
 
     def toPlayer(player):
@@ -52,7 +92,7 @@ def get_state():
         } for player, card in zip(STATE.players, trick.turns)]
     } for trick in STATE.tricks]
 
-    return jsonify({
+    return {
         "handPage": {
             "heldCards": [toCard(card) for card in STATE.players[selectedPlayer].hand]
         },
@@ -70,7 +110,7 @@ def get_state():
             } for i, player in enumerate(STATE.players)],
             "tricks": tricks
         },
-    })
+    }
 
 
 @ app.route("/api/player/<int:playerNum>/name", methods=['PUT'])
@@ -225,3 +265,7 @@ def parseCards(cardsJson) -> list[Card]:
     cards = [parseCard(c) for c in cardsJson]
     validateCards(cards)
     return cards
+
+
+if __name__ == "__main__":
+    socketio.run(app)
