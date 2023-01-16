@@ -4,17 +4,15 @@ from flask_socketio import SocketIO, emit
 from model import *
 
 app = Flask(__name__)
-# app.config['SECRET_KEY'] = "secret!"
-socketio = SocketIO(app, async_mode='threading')
-# logger=True, engineio_logger=True
+socketio = SocketIO(app)
 
 TASKID = 1
 STATE: RoundState = RoundState(
     players=[
-        PlayerState("", []),
-        PlayerState("", []),
-        PlayerState("", []),
-        PlayerState("", [])
+        PlayerState("Player 1", []),
+        PlayerState("Player 2", []),
+        PlayerState("Player 3", []),
+        PlayerState("Player 4", [])
     ],
     objectives={},
     tricks=[Trick([None, None, None, None])],
@@ -23,34 +21,12 @@ STATE: RoundState = RoundState(
 
 @socketio.on('connect')
 def handle_connect(auth):
-    print("Saw connection!")
-
-
-@socketio.on('ping')
-def handle_ping():
-    print("Ping message!")
-    emit("pong")
+    print("New client connected")
+    emit("appstate", buildStateJson())
 
 
 def publishUpdate():
     socketio.emit("appstate", buildStateJson())
-
-
-@app.route("/api/test")
-def index():
-    #    return """<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    # <script type="text/javascript" charset="utf-8">
-    # var socket = io({ transports: ["websocket"] });
-    # </script></head><body>Hi</body></html>"""
-    return """<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-<script type="text/javascript" charset="utf-8">
-    var socket = io({ transports: ["websocket"] });
-    socket.on('connect', function() {
-        //socket.emit('my event', {data: 'I\\'m connected!'});
-        document.write("Connected!!!");
-        console.log("Connected!!!");
-    });
-</script></head><body>Hi</body></html>"""
 
 
 @app.route("/api/appstate", methods=['GET'])
@@ -120,6 +96,7 @@ def setPlayerName(playerNum):
 
     name = request.get_json()["name"]
     STATE.players[playerNum].name = name
+    publishUpdate()
 
     return Response("Success")
 
@@ -131,6 +108,7 @@ def setPlayerHand(playerNum):
 
     cards = parseCards(request.get_json()["cards"])
     STATE.players[playerNum].hand = cards
+    publishUpdate()
 
     return Response("Success")
 
@@ -149,6 +127,7 @@ def addObjective():
 
     STATE.objectives[TASKID] = Task(objtype, order, card, playerNum)
     TASKID += 1
+    publishUpdate()
 
     return Response("Success")
 
@@ -158,6 +137,7 @@ def removeObjective(id):
     validateTaskId(id)
 
     del STATE.objectives[id]
+    publishUpdate()
 
     return Response("Success")
 
@@ -169,6 +149,7 @@ def setObjectiveCard(id):
 
     card = parseCard(request.get_json()["card"])
     STATE.objectives[id].card = card
+    publishUpdate()
 
     return Response("Success")
 
@@ -180,6 +161,7 @@ def setObjectivePlayer(id):
 
     playerNum = parsePlayerNum(request.get_json()["playerNum"])
     STATE.objectives[id].player = playerNum
+    publishUpdate()
 
     return Response("Success")
 
@@ -192,6 +174,7 @@ def setTrickTurnCard(trickIndex, turnIndex):
 
     card = parseCard(request.get_json()["card"])
     STATE.tricks[trickIndex].turns[turnIndex] = card
+    publishUpdate()
 
     return Response("Success")
 

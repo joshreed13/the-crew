@@ -15,25 +15,23 @@ import TricksPage from './pages/Tricks';
 import ControlPanel from './pages/ControlPanel';
 
 interface ServerToClientEvents {
-  "pong": () => void;
+  "appstate": (data: AppState) => void;
 }
 
 interface ClientToServerEvents {
-  "ping": () => void;
 }
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({ transports: ["websocket"] });
 
 function App() {
-  const [data, setData] = useState({
+  const [data, setData] = useState<AppState>({
     handPage: { heldCards: [] },
     objectivePage: { tasks: [] },
     tricksPage: { tricks: [] },
     controlPanel: { players: [], tricks: [] },
   });
 
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [lastPong, setLastPong] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
   useEffect(() => {
     socket.on("connect", () => {
       setIsConnected(true);
@@ -43,32 +41,19 @@ function App() {
       setIsConnected(false);
     });
 
-    socket.on("pong", () => {
-      setLastPong(new Date().toISOString());
+    socket.on("appstate", (data) => {
+      setData(data);
     });
 
     return () => {
       socket.off("connect");
       socket.off("disconnect");
-      socket.off("pong");
     };
   }, []);
 
-  const sendPing = () => {
-    socket.emit("ping");
-  };
-
-  return (
-    <div>
-      <p>{isConnected ? "Connected" : "Disconnected"}</p>
-      <p>{lastPong}</p>
-      <button onClick={sendPing}>Send ping</button>
-    </div>
-  );
-  /*
   return (
     <Routes>
-      <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
+      <Route path="/" element={<Root isConnected={isConnected} />} errorElement={<ErrorPage />}>
         <Route errorElement={<ErrorPage />}>
           <Route index element={<IndexPage />} />
           <Route path="hand/" element={<HandPage data={data.handPage} />} />
@@ -79,14 +64,14 @@ function App() {
       </Route>
     </Routes>
   );
-  */
 }
 
-function Root() {
+function Root({ isConnected }: { isConnected: boolean }) {
   return (
     <>
       <div id="sidebar">
         <Link to={`/`}><h1>🚀</h1></Link>
+        <p>{isConnected ? "Connected" : "Disconnected"}</p>
         <nav>
           <ul>
             <li>
