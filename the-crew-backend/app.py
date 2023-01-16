@@ -9,10 +9,10 @@ socketio = SocketIO(app)
 TASKID = 1
 STATE: RoundState = RoundState(
     players=[
-        PlayerState("Player 1", []),
-        PlayerState("Player 2", []),
-        PlayerState("Player 3", []),
-        PlayerState("Player 4", [])
+        PlayerState("Player 1", [Card("B", 1)]),
+        PlayerState("Player 2", [Card("Y", 2)]),
+        PlayerState("Player 3", [Card("M", 3)]),
+        PlayerState("Player 4", [Card("G", 4)])
     ],
     objectives={},
     tricks=[Trick([None, None, None, None])],
@@ -35,8 +35,6 @@ def get_state():
 
 
 def buildStateJson():
-    selectedPlayer = 0
-
     def toPlayer(player):
         return {
             "name": player.name,
@@ -70,7 +68,7 @@ def buildStateJson():
 
     return {
         "handPage": {
-            "heldCards": [toCard(card) for card in STATE.players[selectedPlayer].hand]
+            "heldCards": [[toCard(card) for card in player.hand] for player in STATE.players]
         },
         "objectivePage": {
             "tasks": [toTask(id, task) for id, task in STATE.objectives.items()]

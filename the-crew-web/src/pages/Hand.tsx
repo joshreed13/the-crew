@@ -1,10 +1,14 @@
-import { HandPageData } from "../model";
+import { Card, HandPageData } from "../model";
 import { CardView } from "../Common";
 
-export default function HandPage({ data }: { data: HandPageData }) {
+export default function HandPage({ data, selectedPlayer }: { data: HandPageData, selectedPlayer: number | null }) {
     return (
-        <div className="bordered">
-            {data.heldCards.map((card) => (<CardView card={card} />))}
-        </div>
+        <>
+            {data.heldCards.map((hand: Card[]) => (
+                <div className="bordered">
+                    {hand.map((card) => (<CardView card={card} />))}
+                </div>
+            ))}
+        </>
     );
 }

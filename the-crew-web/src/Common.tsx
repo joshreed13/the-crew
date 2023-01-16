@@ -28,7 +28,7 @@ export function PlayerName({ player }: { player: Player }) {
 
 export function TrickView({ data }: { data: Trick }) {
     return (
-        <div className="bordered">
+        <div className="bordered trickContainer">
             {data.turns.map((turn) => (<TurnView data={turn} />))}
         </div>
     );
@@ -36,7 +36,7 @@ export function TrickView({ data }: { data: Trick }) {
 
 function TurnView({ data }: { data: Turn }) {
     return (
-        <div className="bordered">
+        <div className="bordered turnContainer">
             <PlayerName player={data.player} />
             <p>{data.isLeader ? "[Leader] " : ""} {data.isNextToPlay ? "[Next] " : ""} {data.isWinner ? "[Winner] " : ""}</p>
             {data.card ? <CardView card={data.card} /> : <></>}

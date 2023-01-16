@@ -6,7 +6,7 @@ export type AppState = {
 };
 
 export type HandPageData = {
-    heldCards: Card[];
+    heldCards: Card[][];
 };
 
 export type ObjectivePageData = {

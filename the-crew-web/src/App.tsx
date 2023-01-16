@@ -9,6 +9,7 @@ import {
 import io, { Socket } from 'socket.io-client'
 import './App.css';
 import { AppState, Card, Player, Task, Trick } from './model';
+import UserPage from './pages/User';
 import HandPage from './pages/Hand';
 import ObjectivesPage from './pages/Objectives';
 import TricksPage from './pages/Tricks';
@@ -30,6 +31,8 @@ function App() {
     tricksPage: { tricks: [] },
     controlPanel: { players: [], tricks: [] },
   });
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
+
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
   useEffect(() => {
@@ -56,7 +59,8 @@ function App() {
       <Route path="/" element={<Root isConnected={isConnected} />} errorElement={<ErrorPage />}>
         <Route errorElement={<ErrorPage />}>
           <Route index element={<IndexPage />} />
-          <Route path="hand/" element={<HandPage data={data.handPage} />} />
+          <Route path="user/" element={<UserPage selectedPlayer={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />} />
+          <Route path="hand/" element={<HandPage data={data.handPage} selectedPlayer={selectedPlayer} />} />
           <Route path="objectives/" element={<ObjectivesPage data={data.objectivePage} />} />
           <Route path="tricks/" element={<TricksPage data={data.tricksPage} />} />
           <Route path="controlpanel/" element={<ControlPanel data={data.controlPanel} />} />
@@ -74,6 +78,9 @@ function Root({ isConnected }: { isConnected: boolean }) {
         <p>{isConnected ? "Connected" : "Disconnected"}</p>
         <nav>
           <ul>
+            <li>
+              <Link to={`/user/`}>User</Link>
+            </li>
             <li>
               <Link to={`/hand/`}>Hand</Link>
             </li>
