@@ -1,8 +1,9 @@
 import { Card, Player, Task, Trick, Turn } from "./model";
 import "./Common.css";
+import { CardPicker } from "./CardPicker";
+import { apiCall } from "./api";
 
 export function CardView({ card }: { card: Card }) {
-    let suitName = "?"
     switch (card.suit) {
         case "B": return <div className="cardContainer blueCard">{card.value}</div>;
         case "Y": return <div className="cardContainer yellowCard">{card.value}</div>
@@ -26,20 +27,23 @@ export function PlayerName({ player }: { player: Player }) {
     );
 }
 
-export function TrickView({ data }: { data: Trick }) {
+export function TrickView({ data, trickNum }: { data: Trick, trickNum: number }) {
     return (
         <div className="bordered trickContainer">
-            {data.turns.map((turn) => (<TurnView data={turn} />))}
+            {data.turns.map((turn, i) => (<TurnView data={turn} trickNum={trickNum} turnNum={i} />))}
         </div>
     );
 }
 
-function TurnView({ data }: { data: Turn }) {
+function TurnView({ data, trickNum, turnNum }: { data: Turn, trickNum: number, turnNum: number }) {
     return (
         <div className="bordered turnContainer">
             <PlayerName player={data.player} />
             <p>{data.isLeader ? "[Leader] " : ""} {data.isNextToPlay ? "[Next] " : ""} {data.isWinner ? "[Winner] " : ""}</p>
             {data.card ? <CardView card={data.card} /> : <></>}
+            <CardPicker callback={(card: Card) => {
+                apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
+            }} />
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useRouteError,
   Routes,
@@ -31,7 +31,7 @@ function App() {
     tricksPage: { tricks: [] },
     controlPanel: { players: [], tricks: [] },
   });
-  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(0);
 
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);

@@ -8,7 +8,7 @@ export default function ControlPanel({ data }: { data: ControlPanelData }) {
                 {data.players.map((playerData) => (<PlayerView data={playerData} />))}
             </div>
             <div>
-                {data.tricks.map((trickData) => (<TrickView data={trickData} />))}
+                {data.tricks.map((trickData, i) => (<TrickView data={trickData} trickNum={i} />))}
             </div>
         </div>
     );
