@@ -1,25 +1,25 @@
-import { ControlPanelState, PlayerState } from "../model";
+import { ControlPanelData, PlayerData } from "../model";
 import { CardView, PlayerName, TaskView, TrickView } from "../Common";
 
-export default function ControlPanel({ state }: { state: ControlPanelState }) {
+export default function ControlPanel({ data }: { data: ControlPanelData }) {
     return (
         <div>
             <div>
-                {state.players.map((playerState) => (<PlayerView state={playerState} />))}
+                {data.players.map((playerData) => (<PlayerView data={playerData} />))}
             </div>
             <div>
-                {state.tricks.map((trickState) => (<TrickView state={trickState} />))}
+                {data.tricks.map((trickData) => (<TrickView data={trickData} />))}
             </div>
         </div>
     );
 }
 
-function PlayerView({ state }: { state: PlayerState }) {
+function PlayerView({ data }: { data: PlayerData }) {
     return (
         <div className="bordered">
-            <PlayerName player={state.player} />
-            {state.hand.map((card) => (<CardView card={card} />))}
-            {state.tasks.map((task) => (<TaskView task={task} />))}
+            <PlayerName player={data.player} />
+            {data.hand.map((card) => (<CardView card={card} />))}
+            {data.tasks.map((task) => (<TaskView task={task} />))}
         </div>
     );
 }

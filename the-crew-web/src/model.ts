@@ -1,28 +1,28 @@
 export type AppState = {
-    handPage: HandPageState;
-    objectivePage: ObjectivePageState;
-    tricksPage: TricksPageState;
-    controlPanel: ControlPanelState;
+    handPage: HandPageData;
+    objectivePage: ObjectivePageData;
+    tricksPage: TricksPageData;
+    controlPanel: ControlPanelData;
 };
 
-export type HandPageState = {
+export type HandPageData = {
     heldCards: Card[];
 };
 
-export type ObjectivePageState = {
+export type ObjectivePageData = {
     tasks: Task[];
 };
 
-export type TricksPageState = {
+export type TricksPageData = {
     tricks: Trick[];
 };
 
-export type ControlPanelState = {
-    players: PlayerState[];
+export type ControlPanelData = {
+    players: PlayerData[];
     tricks: Trick[];
 }
 
-export type PlayerState = {
+export type PlayerData = {
     player: Player;
     hand: Card[];
     tasks: Task[];

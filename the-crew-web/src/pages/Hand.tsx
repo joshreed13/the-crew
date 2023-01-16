@@ -1,10 +1,10 @@
-import { HandPageState } from "../model";
+import { HandPageData } from "../model";
 import { CardView } from "../Common";
 
-export default function HandPage({ state }: { state: HandPageState }) {
+export default function HandPage({ data }: { data: HandPageData }) {
     return (
         <div className="bordered">
-            {state.heldCards.map((card) => (<CardView card={card} />))}
+            {data.heldCards.map((card) => (<CardView card={card} />))}
         </div>
     );
 }

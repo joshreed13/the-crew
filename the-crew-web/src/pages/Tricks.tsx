@@ -1,10 +1,10 @@
-import { TricksPageState } from "../model";
+import { TricksPageData } from "../model";
 import { TrickView } from "../Common";
 
-export default function TricksPage({ state }: { state: TricksPageState }) {
+export default function TricksPage({ data }: { data: TricksPageData }) {
     return (
         <div>
-            {state.tricks.map((trickState) => (<TrickView state={trickState} />))}
+            {data.tricks.map((trickData) => (<TrickView data={trickData} />))}
         </div>
     );
 }

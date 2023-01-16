@@ -26,20 +26,20 @@ export function PlayerName({ player }: { player: Player }) {
     );
 }
 
-export function TrickView({ state }: { state: Trick }) {
+export function TrickView({ data }: { data: Trick }) {
     return (
         <div className="bordered">
-            {state.turns.map((turn) => (<TurnView state={turn} />))}
+            {data.turns.map((turn) => (<TurnView data={turn} />))}
         </div>
     );
 }
 
-function TurnView({ state }: { state: Turn }) {
+function TurnView({ data }: { data: Turn }) {
     return (
         <div className="bordered">
-            <PlayerName player={state.player} />
-            <p>{state.isLeader ? "[Leader] " : ""} {state.isNextToPlay ? "[Next] " : ""} {state.isWinner ? "[Winner] " : ""}</p>
-            {state.card ? <CardView card={state.card} /> : <></>}
+            <PlayerName player={data.player} />
+            <p>{data.isLeader ? "[Leader] " : ""} {data.isNextToPlay ? "[Next] " : ""} {data.isWinner ? "[Winner] " : ""}</p>
+            {data.card ? <CardView card={data.card} /> : <></>}
         </div>
     );
 }

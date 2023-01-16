@@ -94,10 +94,10 @@ class App extends React.Component<{}, AppState> {
         <Route path="/" element={<Root />} errorElement={<ErrorPage />}>
           <Route errorElement={<ErrorPage />}>
             <Route index element={<IndexPage />} />
-            <Route path="hand/" element={<HandPage state={this.state.handPage} />} />
-            <Route path="objectives/" element={<ObjectivesPage state={this.state.objectivePage} />} />
-            <Route path="tricks/" element={<TricksPage state={this.state.tricksPage} />} />
-            <Route path="controlpanel/" element={<ControlPanel state={this.state.controlPanel} />} />
+            <Route path="hand/" element={<HandPage data={this.state.handPage} />} />
+            <Route path="objectives/" element={<ObjectivesPage data={this.state.objectivePage} />} />
+            <Route path="tricks/" element={<TricksPage data={this.state.tricksPage} />} />
+            <Route path="controlpanel/" element={<ControlPanel data={this.state.controlPanel} />} />
           </Route>
         </Route>
       </Routes>

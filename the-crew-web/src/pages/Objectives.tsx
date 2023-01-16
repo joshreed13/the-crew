@@ -1,10 +1,10 @@
-import { ObjectivePageState } from "../model";
+import { ObjectivePageData } from "../model";
 import { TaskView } from "../Common";
 
-export default function ObjectivesPage({ state }: { state: ObjectivePageState }) {
+export default function ObjectivesPage({ data }: { data: ObjectivePageData }) {
     return (
         <ol>
-            {state.tasks.map((task) => (
+            {data.tasks.map((task) => (
                 <li>
                     <TaskView task={task} />
                 </li>
