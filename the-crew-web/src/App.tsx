@@ -13,79 +13,17 @@ import ObjectivesPage from './pages/Objectives';
 import TricksPage from './pages/Tricks';
 import ControlPanel from './pages/ControlPanel';
 
-const player1: Player = {
-  name: "John",
-  isCommander: true
-};
-
-const player2: Player = {
-  name: "Sally",
-  isCommander: false
-};
-
-const hand1: Card[] = [
-  { suit: "B", value: 1 },
-  { suit: "Y", value: 3 },
-  { suit: "M", value: 6 },
-  { suit: "G", value: 9 },
-  { suit: "R", value: 4 }
-];
-
-const task1: Task = {
-  id: "a",
-  type: "absolute",
-  order: 1,
-  card: { suit: "G", value: 4 },
-  player: {
-    name: "John",
-    isCommander: true
-  }
-};
-
-const tricks: Trick[] = [{
-  turns: [{
-    player: player1,
-    card: { suit: "Y", value: 3 },
-    isLeader: true,
-    isWinner: false,
-    isNextToPlay: false,
-  }, {
-    player: player2,
-    card: { suit: "B", value: 9 },
-    isLeader: false,
-    isWinner: false,
-    isNextToPlay: false,
-  }]
-}];
-
-const mystate: AppState = {
-  handPage: {
-    heldCards: hand1
-  },
-  objectivePage: {
-    tasks: [task1]
-  },
-  tricksPage: {
-    tricks: tricks
-  },
-  controlPanel: {
-    players: [{
-      player: player1,
-      hand: hand1,
-      tasks: [task1],
-    }, {
-      player: player2,
-      hand: hand1,
-      tasks: [],
-    }],
-    tricks: tricks
-  },
-}
-
 class App extends React.Component<{}, AppState> {
   constructor(props: any) {
     super(props);
-    this.state = mystate;
+    this.state = {
+      handPage: { heldCards: [] },
+      objectivePage: { tasks: [] },
+      tricksPage: { tricks: [] },
+      controlPanel: { players: [], tricks: [] },
+    };
+
+    fetch('/api/appstate').then(async (response) => this.setState(await response.json() as AppState));
   }
 
   render() {

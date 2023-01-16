@@ -19,7 +19,6 @@ STATE: RoundState = RoundState(
 
 @app.route("/api/appstate", methods=['GET'])
 def get_state():
-    print(STATE)
     selectedPlayer = 0
 
     def toPlayer(player):
