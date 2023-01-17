@@ -3,7 +3,7 @@ import { CardView } from "../Common";
 import { MultiCardPicker } from "../CardPicker";
 import { apiCall } from "../api";
 
-export default function HandPage({ data, selectedPlayer }: { data: HandPageData, selectedPlayer: number | null }) {
+export default function HandPage({ data, selectedPlayer }: { data: HandPageData, selectedPlayer: number | undefined }) {
     return (
         <>
             {data.heldCards.map((hand: Card[], i) => (

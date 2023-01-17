@@ -31,7 +31,7 @@ function App() {
     tricksPage: { tricks: [] },
     controlPanel: { players: [], tricks: [] },
   });
-  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(0);
+  const [selectedPlayer, setSelectedPlayer] = useState<number | undefined>(0);
 
 
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
@@ -59,7 +59,7 @@ function App() {
       <Route path="/" element={<Root isConnected={isConnected} />} errorElement={<ErrorPage />}>
         <Route errorElement={<ErrorPage />}>
           <Route index element={<IndexPage />} />
-          <Route path="user/" element={<UserPage selectedPlayer={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />} />
+          <Route path="user/" element={<UserPage players={data.objectivePage.players} selectedPlayer={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />} />
           <Route path="hand/" element={<HandPage data={data.handPage} selectedPlayer={selectedPlayer} />} />
           <Route path="objectives/" element={<ObjectivesPage data={data.objectivePage} />} />
           <Route path="tricks/" element={<TricksPage data={data.tricksPage} />} />
