@@ -23,7 +23,7 @@ class Task:
     type: str
     order: int
     card: Optional[Card]
-    player: Optional[int]
+    playerNum: Optional[int]
 
 
 @dataclass_json

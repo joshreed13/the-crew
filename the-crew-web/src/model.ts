@@ -11,6 +11,10 @@ export type HandPageData = {
 
 export type ObjectivePageData = {
     tasks: Task[];
+    nextAbsolute: number;
+    nextRelative: number;
+    haveLast: boolean;
+    players: Player[];
 };
 
 export type TricksPageData = {
@@ -49,6 +53,7 @@ export type Turn = {
 };
 
 export type Player = {
+    num: number;
     name: string;
     isCommander: boolean;
 };

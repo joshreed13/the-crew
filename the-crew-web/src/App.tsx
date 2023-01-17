@@ -27,7 +27,7 @@ const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({ transpor
 function App() {
   const [data, setData] = useState<AppState>({
     handPage: { heldCards: [] },
-    objectivePage: { tasks: [] },
+    objectivePage: { tasks: [], nextAbsolute: 1, nextRelative: 1, haveLast: false, players: [] },
     tricksPage: { tricks: [] },
     controlPanel: { players: [], tricks: [] },
   });

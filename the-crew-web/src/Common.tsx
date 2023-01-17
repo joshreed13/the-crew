@@ -15,16 +15,21 @@ export function CardView({ card }: { card: Card }) {
 }
 
 export function TaskView({ task }: { task: Task }) {
-    return <div>Task: {task.id} ({task.type} {task.order} {task.card?.suit}, {task.card?.value}) assigned to {task.player?.name}</div>
+    return <div>Task: {task.id} ({task.type} {task.order} {task.card?.suit}, {task.card?.value}) assigned to <PlayerName player={task.player} /></div>
 }
 
-export function PlayerName({ player }: { player: Player }) {
-    return (
-        <p>
-            {player.name}
-            {player.isCommander ? "🧑‍🚀" : ""}
-        </p>
-    );
+export function PlayerName({ player }: { player: Player | undefined }) {
+    if (player == undefined) {
+        return <span>?</span>
+    }
+    else {
+        return (
+            <span>
+                {player.name}
+                {player.isCommander ? "🧑‍🚀" : ""}
+            </span>
+        );
+    }
 }
 
 export function TrickView({ data, trickNum }: { data: Trick, trickNum: number }) {
