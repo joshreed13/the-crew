@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, cast
 
 
 @dataclass
@@ -25,6 +25,9 @@ class Task:
 @dataclass
 class Trick:
     turns: list[Optional[Card]]
+    leadPlayerNum: int = 0
+    winnerPlayerNum: Optional[int] = None
+    nextTurnPlayerNum: Optional[int] = None
 
 
 class Round:
@@ -56,6 +59,11 @@ class Round:
         self.taskId += 1
 
     def removeObjective(self, id: int):
+        obj = self.objectives.get(id)
+        if obj and obj.type in {"absolute", "relative"}:
+            for id, task in self.objectives.items():
+                if task.type == obj.type and task.order > obj.order:
+                    task.order -= 1
         del self.objectives[id]
 
     def setObjectiveCard(self, id: int, card: Card):
@@ -65,7 +73,16 @@ class Round:
         self.objectives[id].playerNum = playerNum
 
     def setTrickTurnCard(self, trickIndex: int, turnIndex: int, card: Card):
-        self.tricks[trickIndex].turns[turnIndex] = card
+        trick = self.tricks[trickIndex]
+        trick.turns[turnIndex] = card
+
+        try:
+            trick.nextTurnPlayerNum = [
+                card is None for card in trick.turns].index(True)
+            trick.winnerPlayerNum = None
+        except ValueError:
+            trick.nextTurnPlayerNum = None
+            trick.winnerPlayerNum = _trickWinner(cast(list[Card], trick.turns))
 
     def toJson(self):
         def toPlayer(playerNum: int, player: PlayerState):
@@ -94,9 +111,9 @@ class Round:
             "turns": [{
                 "player": toPlayer(playerNum, self.players[playerNum]),
                 "card": toCard(card)if card is not None else None,
-                "isLeader": False,
-                "isWinner": False,
-                "isNextToPlay": False,
+                "isLeader": playerNum == trick.leadPlayerNum,
+                "isWinner": playerNum == trick.winnerPlayerNum,
+                "isNextToPlay": playerNum == trick.nextTurnPlayerNum,
             } for playerNum, card in enumerate(trick.turns)]
         } for trick in self.tricks]
 
@@ -123,3 +140,13 @@ class Round:
                 "tricks": tricks
             },
         }
+
+
+def _trickWinner(cards: list[Card]):
+    assert cards
+    eligible = [card for card in cards if card.suit == "R"]
+    if not eligible:
+        leadSuit = cards[0].suit
+        eligible = [card for card in cards if card.suit == leadSuit]
+    winningCard = max(eligible, key=lambda c: c.value)
+    return cards.index(winningCard)
