@@ -1,4 +1,3 @@
 flask
-dataclasses_json
 python-socketio
 flask-socketio
