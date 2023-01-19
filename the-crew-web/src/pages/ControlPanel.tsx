@@ -1,9 +1,17 @@
 import { ControlPanelData, PlayerData } from "../model";
 import { CardView, PlayerName, TaskView, TrickView } from "../Common";
+import { apiCall } from "../api";
 
 export default function ControlPanel({ data }: { data: ControlPanelData }) {
+    const resetGame = () => {
+        if (window.confirm("Are you sure you want to reset the game?")) {
+            apiCall(`/api/reset`, {}, "POST");
+        }
+    };
+
     return (
         <div>
+            <button onClick={resetGame}>Reset Game</button>
             <div>
                 {data.players.map((playerData) => (<PlayerView data={playerData} />))}
             </div>

@@ -28,6 +28,13 @@ def get_state():
     return jsonify(STATE.toJson())
 
 
+@ app.route("/api/reset", methods=['POST'])
+def resetGame():
+    STATE.reset()
+    publishUpdate()
+    return Response("Success")
+
+
 @ app.route("/api/player/<int:playerNum>/name", methods=['PUT'])
 def setPlayerName(playerNum):
     json = validateRequestIsJson(request)

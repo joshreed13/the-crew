@@ -46,6 +46,9 @@ class Round:
     solves: list[Solve]
 
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.taskId = 1
         self.players = [
             PlayerState("Player 1", [Card("B", 1)]),
