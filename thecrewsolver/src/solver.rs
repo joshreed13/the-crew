@@ -3,6 +3,7 @@ use crate::play::{Hands, Play, PlayGenerator};
 use crate::player::PlayerIndex;
 use crate::tasks::TasksObjective;
 
+#[derive(PartialEq, Debug)]
 pub struct GameState {
     hands: Hands,
     tasks: TasksObjective,

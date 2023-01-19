@@ -29,6 +29,7 @@ impl Task {
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub struct TasksObjective {
     absolute_tasks: TaskList,
     relative_tasks: TaskList,
@@ -115,6 +116,7 @@ enum TaskEvaluation {
 
 const TASK_LIST_LENGTH: usize = 12;
 
+#[derive(PartialEq, Debug)]
 pub struct TaskList {
     mask: CardSet,
     tasks: [Task; TASK_LIST_LENGTH],
