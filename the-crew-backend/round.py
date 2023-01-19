@@ -30,11 +30,20 @@ class Trick:
     nextTurnPlayerNum: Optional[int] = None
 
 
+@dataclass
+class Solve:
+    id: int
+    success: bool
+    result: bool
+    duration: int
+
+
 class Round:
     taskId: int
     players: list[PlayerState]
     objectives: dict[int, Task]
     tricks: list[Trick]
+    solves: list[Solve]
 
     def __init__(self):
         self.taskId = 1
@@ -46,6 +55,7 @@ class Round:
         ]
         self.objectives = {}
         self.tricks = [Trick([None, None, None, None])]
+        self.solves = []
 
     def setPlayerName(self, playerNum: int, name: str):
         self.players[playerNum].name = name
@@ -83,6 +93,10 @@ class Round:
         except ValueError:
             trick.nextTurnPlayerNum = None
             trick.winnerPlayerNum = _trickWinner(cast(list[Card], trick.turns))
+
+    def addSolverResult(self, id, result):
+        self.solves.append(
+            Solve(id, result["success"], result["result"], result["duration"]))
 
     def toJson(self):
         def toPlayer(playerNum: int, player: PlayerState):
@@ -139,6 +153,14 @@ class Round:
                 } for playerNum, player in enumerate(self.players)],
                 "tricks": tricks
             },
+            "solverPage": {
+                "solves": [{
+                    "id": solve.id,
+                    "success": solve.success,
+                    "result": solve.result,
+                    "duration": solve.duration,
+                } for solve in self.solves]
+            }
         }
 
 

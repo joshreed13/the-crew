@@ -14,6 +14,7 @@ import HandPage from './pages/Hand';
 import ObjectivesPage from './pages/Objectives';
 import TricksPage from './pages/Tricks';
 import ControlPanel from './pages/ControlPanel';
+import SolverPage from './pages/Solver';
 
 interface ServerToClientEvents {
   "appstate": (data: AppState) => void;
@@ -30,6 +31,7 @@ function App() {
     objectivePage: { tasks: [], nextAbsolute: 1, nextRelative: 1, haveLast: false, players: [] },
     tricksPage: { tricks: [] },
     controlPanel: { players: [], tricks: [] },
+    solverPage: { solves: [] },
   });
   const [selectedPlayer, setSelectedPlayer] = useState<number | undefined>(0);
 
@@ -64,6 +66,7 @@ function App() {
           <Route path="objectives/" element={<ObjectivesPage data={data.objectivePage} />} />
           <Route path="tricks/" element={<TricksPage data={data.tricksPage} />} />
           <Route path="controlpanel/" element={<ControlPanel data={data.controlPanel} />} />
+          <Route path="solver/" element={<SolverPage data={data.solverPage} />} />
         </Route>
       </Route>
     </Routes>
@@ -92,6 +95,9 @@ function Root({ isConnected }: { isConnected: boolean }) {
             </li>
             <li>
               <Link to={`/controlpanel/`}>Control Panel</Link>
+            </li>
+            <li>
+              <Link to={`/solver/`}>Solver</Link>
             </li>
           </ul>
         </nav>

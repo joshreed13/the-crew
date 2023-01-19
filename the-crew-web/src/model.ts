@@ -3,6 +3,7 @@ export type AppState = {
     objectivePage: ObjectivePageData;
     tricksPage: TricksPageData;
     controlPanel: ControlPanelData;
+    solverPage: SolverPageData;
 };
 
 export type HandPageData = {
@@ -24,6 +25,10 @@ export type TricksPageData = {
 export type ControlPanelData = {
     players: PlayerData[];
     tricks: Trick[];
+}
+
+export type SolverPageData = {
+    solves: Solve[];
 }
 
 export type PlayerData = {
@@ -50,6 +55,13 @@ export type Turn = {
     isLeader: boolean;
     isWinner: boolean;
     isNextToPlay: boolean;
+};
+
+export type Solve = {
+    id: number;
+    success: boolean;
+    result: boolean;
+    duration: number;
 };
 
 export type Player = {

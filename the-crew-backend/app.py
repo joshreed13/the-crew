@@ -3,12 +3,14 @@ import werkzeug.exceptions
 from flask_socketio import SocketIO, emit
 
 from round import Round, Card
+from solver import Solver
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 
 STATE = Round()
+SOLVER = Solver()
 
 
 @socketio.on('connect')
@@ -107,6 +109,15 @@ def setTrickTurnCard(trickIndex, turnIndex):
 
     STATE.setTrickTurnCard(trickIndex, turnIndex, card)
     publishUpdate()
+    return Response("Success")
+
+
+@ app.route("/api/solve", methods=['PUT'])
+def solve():
+    def callback(id, result):
+        STATE.addSolverResult(id, result)
+        publishUpdate()
+    SOLVER.solve(STATE, callback)
     return Response("Success")
 
 
