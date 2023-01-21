@@ -34,17 +34,12 @@ export function getTaskString(taskType: string, taskOrder: number) {
     }
 }
 
-export function PlayerName({ player }: { player: Player | undefined }) {
-    if (player == undefined) {
-        return <span>?</span>
+export function getPlayerName(player: Player | undefined): string {
+    if (player === undefined) {
+        return "?"
     }
     else {
-        return (
-            <span>
-                {player.name}
-                {player.isCommander ? "🧑‍🚀" : ""}
-            </span>
-        );
+        return `${player.name}${player.isCommander ? "🧑‍🚀" : ""}`;
     }
 }
 
@@ -73,7 +68,7 @@ function TurnView({ data, trickNum, turnNum, possibleCards }: { data: Turn, tric
             <Container>
                 <Row>
                     <Col>
-                        <PlayerName player={data.player} />
+                        <span>{getPlayerName(data.player)}</span>
                         {data.isLeader && <Badge bg="secondary">Leader</Badge>}
                         {data.isNextToPlay && <Badge bg="success">Next</Badge>}
                         {data.isWinner && <Badge bg="warning">Winner</Badge>}

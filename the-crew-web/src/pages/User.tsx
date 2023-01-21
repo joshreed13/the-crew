@@ -28,7 +28,7 @@ export default function UserPage({ players, selectedPlayer, setSelectedPlayer }:
             </Row>
             <Row>
                 <Col>
-                    Selected Player {selectedPlayer || "?"}
+                    [Selected Player Code {(selectedPlayer === undefined) ? "?" : selectedPlayer}]
                 </Col>
             </Row>
         </>

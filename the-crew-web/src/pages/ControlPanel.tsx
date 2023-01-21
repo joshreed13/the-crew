@@ -1,6 +1,6 @@
 import { Button, Col, Row, Stack } from "react-bootstrap";
 import { ControlPanelData, PlayerData, TricksPageData } from "../model";
-import { CardView, PlayerName, TaskTokenView, TrickView } from "../Common";
+import { CardView, getPlayerName, TaskTokenView, TrickView } from "../Common";
 import { apiCall } from "../api";
 
 import "./ControlPanel.css"
@@ -30,7 +30,7 @@ function PlayerView({ data }: { data: PlayerData }) {
     return (
         <Row>
             <Col>
-                <PlayerName player={data.player} />
+                <span>{getPlayerName(data.player)}</span>
             </Col>
             <Col>
                 <Stack direction="horizontal" gap={1}>

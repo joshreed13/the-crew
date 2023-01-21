@@ -1,5 +1,5 @@
 import { Form } from 'react-bootstrap';
-import { PlayerName } from "./Common";
+import { getPlayerName } from "./Common";
 import { Player } from "./model";
 
 export function PlayerPicker({ players, selectedPlayerNum, callback }: { players: Player[], selectedPlayerNum: number | undefined, callback: (playerNum: number) => void }) {
@@ -8,11 +8,12 @@ export function PlayerPicker({ players, selectedPlayerNum, callback }: { players
         callback(Number(select.value));
     };
 
+    console.log(selectedPlayerNum);
     return (
         <Form.Select value={selectedPlayerNum} onChange={submitPicker}>
             {players.map((player, i) => (
                 <option value={i}>
-                    <PlayerName player={player} />
+                    {getPlayerName(player)}
                 </option>
             ))}
         </Form.Select>
