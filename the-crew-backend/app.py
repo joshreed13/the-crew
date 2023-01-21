@@ -1,9 +1,16 @@
+import logging
+
 from flask import Flask, request, Response, jsonify
 import werkzeug.exceptions
 from flask_socketio import SocketIO, emit
 
 from round import Round, Card
 from solver import Solver
+
+logging.basicConfig(filename="audit.log",
+                    format="%(asctime)s %(name)s %(levelname)s %(message)s",
+                    datefmt="%Y-%m-%dT%H:%M:%S",
+                    level=logging.INFO)
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -13,6 +20,12 @@ STATE = Round()
 SOLVER = Solver()
 
 
+@app.before_request
+def log_request_info():
+    logging.getLogger("payloads").info(
+        f'{request.remote_addr} {request.method} {request.url} {request.get_data()}')
+
+
 @socketio.on('connect')
 def handle_connect(auth):
     print("New client connected")
@@ -20,7 +33,9 @@ def handle_connect(auth):
 
 
 def publishUpdate():
-    socketio.emit("appstate", STATE.toJson())
+    json = STATE.toJson()
+    socketio.emit("appstate", json)
+    logging.getLogger("state").info(json)
 
 
 @app.route("/api/appstate", methods=['GET'])

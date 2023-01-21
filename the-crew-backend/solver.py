@@ -1,3 +1,4 @@
+import logging
 import os
 import threading
 
@@ -8,8 +9,12 @@ from round import Round
 SOLVER_ENDPOINT = os.environ.get('SOLVER_ENDPOINT')
 
 
+LOGGER = logging.getLogger("solver")
+
+
 class Solver:
     def __init__(self):
+        LOGGER.info(f"Init solver interface: {SOLVER_ENDPOINT}")
         self.nextId = 0
 
     def solve(self, state: Round, callback):
@@ -42,8 +47,7 @@ class Solver:
 def sendRequest(id, data, callback):
     if SOLVER_ENDPOINT is None:
         return
+    LOGGER.info(f"Requesting solve: {data}")
     response = requests.post(SOLVER_ENDPOINT, json=data)
-    import json
-    print(json.dumps(data))
-    print(response.text)
+    LOGGER.info(f"Response received: {response.text}")
     callback(id, response.json())
