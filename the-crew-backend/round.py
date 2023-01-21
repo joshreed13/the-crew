@@ -38,6 +38,9 @@ class Solve:
     duration: int
 
 
+COMMANDER_CARD = Card("R", 4)
+
+
 class Round:
     taskId: int
     players: list[PlayerState]
@@ -67,6 +70,12 @@ class Round:
     def setPlayerHand(self, playerNum: int, cards: list[Card]):
         self.players[playerNum].hand = cards
 
+        if COMMANDER_CARD in cards and len(self.tricks) == 1:
+            firstTrick = self.tricks[0]
+            if all(c is None for c in firstTrick.turns):
+                firstTrick.leadPlayerNum = playerNum
+                firstTrick.nextTurnPlayerNum = _trickNextPlayer(firstTrick)
+
     def addObjective(self, objtype: str, order: int, card: Optional[Card], playerNum: Optional[int]):
         self.objectives[self.taskId] = Task(objtype, order, card, playerNum)
         self.taskId += 1
@@ -87,7 +96,15 @@ class Round:
 
     def setTrickTurnCard(self, trickIndex: int, turnIndex: int, card: Card):
         trick = self.tricks[trickIndex]
+
+        alreadyPlayed = trick.turns[turnIndex]
+        if alreadyPlayed is not None:
+            self.players[turnIndex].hand.append(alreadyPlayed)
         trick.turns[turnIndex] = card
+        try:
+            self.players[turnIndex].hand.remove(card)
+        except ValueError:
+            pass
 
         trick.nextTurnPlayerNum = _trickNextPlayer(trick)
         if trick.nextTurnPlayerNum is None:
@@ -108,7 +125,7 @@ class Round:
             return {
                 "num": playerNum,
                 "name": player.name,
-                "isCommander": Card("R", 4) in player.hand
+                "isCommander": COMMANDER_CARD in player.hand
             }
 
         def toCard(card: Card):

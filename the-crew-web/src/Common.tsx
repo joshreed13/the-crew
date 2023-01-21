@@ -77,10 +77,10 @@ function TurnView({ data, trickNum, turnNum }: { data: Turn, trickNum: number, t
                 </Row>
                 <Row>
                     <Col>
-                        {data.card && <CardView card={data.card} />}
-                        {!data.card && <CardPicker callback={(card: Card) => {
+                        {<CardPicker callback={(card: Card) => {
                             apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
                         }} />}
+                        {data.card && <CardView card={data.card} />}
                     </Col>
                 </Row>
             </Container>
