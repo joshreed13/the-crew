@@ -1,3 +1,4 @@
+import { Col, ListGroup, Row } from "react-bootstrap";
 import { Card, HandPageData } from "../model";
 import { CardView } from "../Common";
 import { MultiCardPicker } from "../CardPicker";
@@ -11,12 +12,24 @@ export default function HandPage({ data, selectedPlayer }: { data: HandPageData,
         let hand = data.heldCards[selectedPlayer];
         return (
             <>
-                <div className="bordered">
-                    {hand.map((card) => (<CardView card={card} />))}
-                </div>
-                <MultiCardPicker callback={(cards: Card[]) => {
-                    apiCall(`/api/player/${selectedPlayer}/hand`, { cards: cards });
-                }} />
+                <Row>
+                    <Col>
+                        <MultiCardPicker callback={(cards: Card[]) => {
+                            apiCall(`/api/player/${selectedPlayer}/hand`, { cards: cards });
+                        }} />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <ListGroup horizontal>
+                            {hand.map((card) => (
+                                <ListGroup.Item>
+                                    <CardView card={card} />
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    </Col>
+                </Row>
             </>
         );
     }

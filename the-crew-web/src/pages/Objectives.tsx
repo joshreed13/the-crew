@@ -1,6 +1,7 @@
+import { Button, ButtonGroup, ButtonToolbar, Card as BootstrapCard, Col, Row } from 'react-bootstrap';
 import { Card, ObjectivePageData, Player, Task } from "../model";
 import { apiCall } from "../api";
-import { CardView, PlayerName } from "../Common";
+import { CardView, getTaskString, TaskTokenView } from "../Common";
 import { CardPicker } from "../CardPicker";
 import { PlayerPicker } from "../PlayerPicker";
 
@@ -11,19 +12,31 @@ export default function ObjectivesPage({ data }: { data: ObjectivePageData }) {
 
     return (
         <>
-            <div>
-                <button onClick={(e) => addObj("anytime", 0)}>Add</button>
-                <button onClick={(e) => addObj("absolute", data.nextAbsolute)}>Add {getTaskString("absolute", data.nextAbsolute)}</button>
-                <button onClick={(e) => addObj("relative", data.nextRelative)}>Add {getTaskString("absolute", data.nextRelative)}</button>
-                <button onClick={(e) => addObj("last", 0)} disabled={data.haveLast}>Add {getTaskString("last", 0)}</button>
-            </div>
-            <ol>
-                {data.tasks.map((task) => (
-                    <li key={task.id}>
+            <Row>
+                <Col>
+                    <ButtonToolbar>
+                        <ButtonGroup>
+                            <Button onClick={(e) => addObj("anytime", 0)}>Add</Button>
+                        </ButtonGroup>
+                        <ButtonGroup>
+                            <Button onClick={(e) => addObj("absolute", data.nextAbsolute)}>Add {getTaskString("absolute", data.nextAbsolute)}</Button>
+                        </ButtonGroup>
+                        <ButtonGroup>
+                            <Button onClick={(e) => addObj("relative", data.nextRelative)}>Add {getTaskString("relative", data.nextRelative)}</Button>
+                        </ButtonGroup>
+                        <ButtonGroup>
+                            <Button onClick={(e) => addObj("last", 0)} disabled={data.haveLast}>Add {getTaskString("last", 0)}</Button>
+                        </ButtonGroup>
+                    </ButtonToolbar>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    {data.tasks.map((task) => (
                         <TaskView task={task} players={data.players} />
-                    </li>
-                ))}
-            </ol>
+                    ))}
+                </Col>
+            </Row>
         </>
     );
 }
@@ -40,22 +53,24 @@ function TaskView({ task, players }: { task: Task, players: Player[] }) {
     }
 
     return (
-        <div className="bordered">
-            {getTaskString(task.type, task.order)}
-            {task.card && <CardView card={task.card} />}
-            <CardPicker callback={(card: Card) => { setCard(task.id, card) }} />
-            <PlayerPicker players={players} selectedPlayerNum={task.player?.num} callback={(playerNum) => (setPlayer(task.id, playerNum))} />
-            <button onClick={(e) => rmObj(task.id)}>X</button>
-        </div>
+        <BootstrapCard key={task.id}>
+            <BootstrapCard.Header>
+                <Button className="float-end" variant='danger' onClick={(e) => rmObj(task.id)}>X</Button>
+            </BootstrapCard.Header>
+            <BootstrapCard.Body>
+                <Row>
+                    <Col>
+                        <TaskTokenView taskType={task.type} order={task.order} />
+                    </Col>
+                    <Col>
+                        {task.card && <CardView card={task.card} />}
+                        <CardPicker callback={(card: Card) => { setCard(task.id, card) }} />
+                    </Col>
+                    <Col>
+                        <PlayerPicker players={players} selectedPlayerNum={task.player?.num} callback={(playerNum) => (setPlayer(task.id, playerNum))} />
+                    </Col>
+                </Row>
+            </BootstrapCard.Body>
+        </BootstrapCard>
     );
-}
-
-function getTaskString(taskType: string, taskOrder: number) {
-    switch (taskType) {
-        case "absolute": return `#${taskOrder}`;
-        case "relative": return "<".repeat(taskOrder);
-        case "anytime": return "";
-        case "last": return "Ω";
-        default: return "";
-    }
 }

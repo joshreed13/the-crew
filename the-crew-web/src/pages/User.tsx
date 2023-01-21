@@ -1,4 +1,5 @@
 import React from "react";
+import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { apiCall } from "../api";
 import { Player } from "../model";
 import { PlayerPicker } from "../PlayerPicker";
@@ -12,14 +13,24 @@ export default function UserPage({ players, selectedPlayer, setSelectedPlayer }:
 
     return (
         <>
-            <p>{selectedPlayer || "?"}</p>
-            <div>
-                <PlayerPicker players={players} selectedPlayerNum={selectedPlayer} callback={(num) => setSelectedPlayer(num)} />
-            </div>
-            <form onSubmit={reqSetName} >
-                <input type="text" name="namefield" />
-                <input type="submit" value="Set Name" />
-            </form>
+            <Row>
+                <Col>
+                    <PlayerPicker players={players} selectedPlayerNum={selectedPlayer} callback={(num) => setSelectedPlayer(num)} />
+                </Col>
+            </Row>
+            <Row>
+                <Form onSubmit={reqSetName} >
+                    <InputGroup>
+                        <Form.Control type="text" name="namefield" placeholder="Set player name" />
+                        <Button variant="primary" as="input" type="submit" value="Set Name" />
+                    </InputGroup>
+                </Form>
+            </Row>
+            <Row>
+                <Col>
+                    Selected Player {selectedPlayer || "?"}
+                </Col>
+            </Row>
         </>
     );
 }

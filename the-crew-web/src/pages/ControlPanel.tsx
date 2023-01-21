@@ -1,5 +1,6 @@
+import { Button, Col, ListGroup, Row, Stack } from "react-bootstrap";
 import { ControlPanelData, PlayerData } from "../model";
-import { CardView, PlayerName, TaskView, TrickView } from "../Common";
+import { CardView, PlayerName, TaskTokenView, TrickView } from "../Common";
 import { apiCall } from "../api";
 
 export default function ControlPanel({ data }: { data: ControlPanelData }) {
@@ -10,24 +11,44 @@ export default function ControlPanel({ data }: { data: ControlPanelData }) {
     };
 
     return (
-        <div>
-            <button onClick={resetGame}>Reset Game</button>
-            <div>
+        <>
+            <Row>
+                <Button onClick={resetGame}>Reset Game</Button>
+            </Row>
+            <Row>
                 {data.players.map((playerData) => (<PlayerView data={playerData} />))}
-            </div>
-            <div>
+            </Row>
+            <Row>
                 {data.tricks.map((trickData, i) => (<TrickView data={trickData} trickNum={i} />))}
-            </div>
-        </div>
+            </Row>
+        </>
     );
 }
 
 function PlayerView({ data }: { data: PlayerData }) {
     return (
-        <div className="bordered">
-            <PlayerName player={data.player} />
-            {data.hand.map((card) => (<CardView card={card} />))}
-            {data.tasks.map((task) => (<TaskView task={task} />))}
-        </div>
+        <Row>
+            <Col>
+                <PlayerName player={data.player} />
+            </Col>
+            <Col>
+                <Stack direction="horizontal" gap={1}>
+                    {data.hand.map((card) => (
+                        <CardView card={card} />
+                    ))}
+                </Stack>
+            </Col>
+            <Col>
+                <Stack direction="horizontal" gap={1}>
+                    {data.tasks.map((task) => (
+                        <Stack direction="horizontal">
+                            {task.card && <CardView card={task.card} />}
+                            <TaskTokenView taskType={task.type} order={task.order} />
+                        </Stack>
+                    ))}
+                </Stack>
+
+            </Col>
+        </Row>
     );
 }

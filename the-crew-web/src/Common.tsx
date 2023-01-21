@@ -1,3 +1,4 @@
+import { Badge, Card as BootstrapCard, Col, Container, ListGroup, Row } from 'react-bootstrap';
 import { Card, Player, Task, Trick, Turn } from "./model";
 import "./Common.css";
 import { CardPicker } from "./CardPicker";
@@ -14,8 +15,22 @@ export function CardView({ card }: { card: Card }) {
     }
 }
 
-export function TaskView({ task }: { task: Task }) {
-    return <div>Task: {task.id} ({task.type} {task.order} {task.card?.suit}, {task.card?.value}) assigned to <PlayerName player={task.player} /></div>
+export function TaskTokenView({ taskType, order }: { taskType: string, order: number }) {
+    return (
+        <div className="cardContainer tokenCard">
+            {getTaskString(taskType, order)}
+        </div>
+    );
+}
+
+export function getTaskString(taskType: string, taskOrder: number) {
+    switch (taskType) {
+        case "absolute": return taskOrder;
+        case "relative": return "<".repeat(taskOrder);
+        case "anytime": return "";
+        case "last": return "Ω";
+        default: return "";
+    }
 }
 
 export function PlayerName({ player }: { player: Player | undefined }) {
@@ -34,21 +49,41 @@ export function PlayerName({ player }: { player: Player | undefined }) {
 
 export function TrickView({ data, trickNum }: { data: Trick, trickNum: number }) {
     return (
-        <div className="bordered trickContainer">
-            {data.turns.map((turn, i) => (<TurnView data={turn} trickNum={trickNum} turnNum={i} />))}
-        </div>
+        <BootstrapCard>
+            <Container>
+                <Row>
+                    {data.turns.map((turn, i) => (
+                        <Col>
+                            <TurnView data={turn} trickNum={trickNum} turnNum={i} />
+                        </Col>
+                    ))}
+                </Row>
+            </Container>
+        </BootstrapCard>
     );
 }
 
 function TurnView({ data, trickNum, turnNum }: { data: Turn, trickNum: number, turnNum: number }) {
     return (
-        <div className="bordered turnContainer">
-            <PlayerName player={data.player} />
-            <p>{data.isLeader ? "[Leader] " : ""} {data.isNextToPlay ? "[Next] " : ""} {data.isWinner ? "[Winner] " : ""}</p>
-            {data.card ? <CardView card={data.card} /> : <></>}
-            <CardPicker callback={(card: Card) => {
-                apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
-            }} />
-        </div>
+        <div>
+            <Container>
+                <Row>
+                    <Col>
+                        <PlayerName player={data.player} />
+                        {data.isLeader && <Badge bg="secondary">Leader</Badge>}
+                        {data.isNextToPlay && <Badge bg="success">Next</Badge>}
+                        {data.isWinner && <Badge bg="warning">Winner</Badge>}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        {data.card && <CardView card={data.card} />}
+                        {!data.card && <CardPicker callback={(card: Card) => {
+                            apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
+                        }} />}
+                    </Col>
+                </Row>
+            </Container>
+        </div >
     );
 }

@@ -7,11 +7,15 @@
     border-color: black;
     border-style: solid;
     border-width: 1px;
+    border-radius: 7px;
 
     text-align: center;
-    line-height: 3em;
+    line-height: 80px;
     font-size: 200%;
     color: white;
+    font-weight: bold;
+    -webkit-text-stroke-color: black;
+    -webkit-text-stroke-width: 1px;
     background-color: black;
 }
 
@@ -33,4 +37,13 @@
 
 .rocketCard {
     background-color: navy;
+}
+
+.tokenCard {
+    height: 60px;
+    line-height: 60px;
+    background-color: black;
+    color: purple;
+    -webkit-text-stroke-color: white;
+    border-radius: 0;
 }

@@ -1,3 +1,4 @@
+import { Form } from 'react-bootstrap';
 import { PlayerName } from "./Common";
 import { Player } from "./model";
 
@@ -8,13 +9,12 @@ export function PlayerPicker({ players, selectedPlayerNum, callback }: { players
     };
 
     return (
-        <select value={selectedPlayerNum} onChange={submitPicker}>
-            <option></option>
+        <Form.Select value={selectedPlayerNum} onChange={submitPicker}>
             {players.map((player, i) => (
                 <option value={i}>
                     <PlayerName player={player} />
                 </option>
             ))}
-        </select>
+        </Form.Select>
     );
 }

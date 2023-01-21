@@ -15,7 +15,9 @@ import TricksPage from './pages/Tricks';
 import ControlPanel from './pages/ControlPanel';
 import SolverPage from './pages/Solver';
 
-import './App.css';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar'
 
 interface ServerToClientEvents {
   "appstate": (data: AppState) => void;
@@ -77,41 +79,57 @@ function App() {
 function Root({ isConnected }: { isConnected: boolean }) {
   return (
     <>
-      <div>
-        <Link to={`/`}><h1>🚀</h1></Link>
-        <p>{isConnected ? "Connected" : "Disconnected"}</p>
-        <nav>
-          <ul>
-            <li>
+      <Navbar>
+        <Navbar.Brand>
+          <Link to={`/`}><h1>🚀</h1></Link>
+        </Navbar.Brand>
+        <Nav variant="tabs">
+          <Nav.Item>
+            <Nav.Link>
               <Link to={`/user/`}>User</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to={`/hand/`}>Hand</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to={`/objectives/`}>Objectives</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to={`/tricks/`}>Tricks</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to={`/controlpanel/`}>Control Panel</Link>
-            </li>
-            <li>
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link>
               <Link to={`/solver/`}>Solver</Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
-      <div id="detail">
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Navbar.Text>
+              {isConnected ? "Connected" : "Disconnected"}
+            </Navbar.Text>
+          </Nav.Item>
+        </Nav>
+      </Navbar >
+      <Container>
         <Outlet />
-      </div>
+      </Container>
     </>
   );
 }
 
 function IndexPage() {
-  return <div>🌎✨🚀✨🪐</div>
+  return <h1>🌎✨🚀✨🪐</h1>
 }
 
 function ErrorPage() {
