@@ -25,9 +25,9 @@ class Task:
 @dataclass
 class Trick:
     turns: list[Optional[Card]]
-    leadPlayerNum: int = 0
+    leadPlayerNum: int
+    nextTurnPlayerNum: Optional[int]
     winnerPlayerNum: Optional[int] = None
-    nextTurnPlayerNum: Optional[int] = None
 
 
 @dataclass
@@ -57,7 +57,8 @@ class Round:
             PlayerState("Player 4", [Card("G", 4)])
         ]
         self.objectives = {}
-        self.tricks = [Trick([None, None, None, None])]
+        self.tricks = [Trick([None, None, None, None],
+                             leadPlayerNum=0, nextTurnPlayerNum=0)]
         self.solves = []
 
     def setPlayerName(self, playerNum: int, name: str):
@@ -88,13 +89,15 @@ class Round:
         trick = self.tricks[trickIndex]
         trick.turns[turnIndex] = card
 
-        try:
-            trick.nextTurnPlayerNum = [
-                card is None for card in trick.turns].index(True)
+        trick.nextTurnPlayerNum = _trickNextPlayer(trick)
+        if trick.nextTurnPlayerNum is None:
+            winner = _trickWinner(
+                cast(list[Card], trick.turns), cast(Card, trick.turns[trick.leadPlayerNum]))
+            trick.winnerPlayerNum = winner
+            self.tricks.append(
+                Trick([None, None, None, None], leadPlayerNum=winner, nextTurnPlayerNum=winner))
+        else:
             trick.winnerPlayerNum = None
-        except ValueError:
-            trick.nextTurnPlayerNum = None
-            trick.winnerPlayerNum = _trickWinner(cast(list[Card], trick.turns))
 
     def addSolverResult(self, id, result):
         self.solves.append(
@@ -166,11 +169,20 @@ class Round:
         }
 
 
-def _trickWinner(cards: list[Card]):
+def _trickNextPlayer(trick: Trick) -> Optional[int]:
+    plays = trick.turns[trick.leadPlayerNum:] + \
+        trick.turns[:trick.leadPlayerNum]
+    try:
+        firstNonePlay = [card is None for card in plays].index(True)
+        return (firstNonePlay + trick.leadPlayerNum) % len(trick.turns)
+    except ValueError:
+        return None
+
+
+def _trickWinner(cards: list[Card], leadCard: Card) -> int:
     assert cards
     eligible = [card for card in cards if card.suit == "R"]
     if not eligible:
-        leadSuit = cards[0].suit
-        eligible = [card for card in cards if card.suit == leadSuit]
+        eligible = [card for card in cards if card.suit == leadCard.suit]
     winningCard = max(eligible, key=lambda c: c.value)
     return cards.index(winningCard)
