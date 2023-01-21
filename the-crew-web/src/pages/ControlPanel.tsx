@@ -3,6 +3,8 @@ import { ControlPanelData, PlayerData } from "../model";
 import { CardView, PlayerName, TaskTokenView, TrickView } from "../Common";
 import { apiCall } from "../api";
 
+import "./ControlPanel.css"
+
 export default function ControlPanel({ data }: { data: ControlPanelData }) {
     const resetGame = () => {
         if (window.confirm("Are you sure you want to reset the game?")) {
@@ -42,12 +44,15 @@ function PlayerView({ data }: { data: PlayerData }) {
                 <Stack direction="horizontal" gap={1}>
                     {data.tasks.map((task) => (
                         <Stack direction="horizontal">
-                            {task.card && <CardView card={task.card} />}
-                            <TaskTokenView taskType={task.type} order={task.order} />
+                            <div className="position-relative">
+                                {task.card && <CardView card={task.card} />}
+                                <span className="position-absolute top-50 start-100 small-token">
+                                    <TaskTokenView taskType={task.type} order={task.order} />
+                                </span>
+                            </div>
                         </Stack>
                     ))}
                 </Stack>
-
             </Col>
         </Row>
     );
