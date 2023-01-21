@@ -54,10 +54,10 @@ class Round:
     def reset(self):
         self.taskId = 1
         self.players = [
-            PlayerState("Player 1", [Card("B", 1)]),
-            PlayerState("Player 2", [Card("Y", 2)]),
-            PlayerState("Player 3", [Card("M", 3)]),
-            PlayerState("Player 4", [Card("G", 4)])
+            PlayerState("Player 1", []),  # Card("B", 1)
+            PlayerState("Player 2", []),  # Card("Y", 2)
+            PlayerState("Player 3", []),  # Card("M", 3)
+            PlayerState("Player 4", [])  # Card("G", 4)
         ]
         self.objectives = {}
         self.tricks = [Trick([None, None, None, None],
@@ -111,8 +111,13 @@ class Round:
             winner = _trickWinner(
                 cast(list[Card], trick.turns), cast(Card, trick.turns[trick.leadPlayerNum]))
             trick.winnerPlayerNum = winner
-            self.tricks.append(
-                Trick([None, None, None, None], leadPlayerNum=winner, nextTurnPlayerNum=winner))
+            if trickIndex == len(self.tricks) - 1:
+                self.tricks.append(
+                    Trick([None, None, None, None], leadPlayerNum=winner, nextTurnPlayerNum=winner))
+            else:
+                self.tricks[trickIndex + 1].leadPlayerNum = winner
+                self.tricks[trickIndex + 1].nextTurnPlayerNum = _trickNextPlayer(
+                    self.tricks[trickIndex + 1])
         else:
             trick.winnerPlayerNum = None
 
