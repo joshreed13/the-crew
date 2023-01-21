@@ -8,9 +8,9 @@ export function PlayerPicker({ players, selectedPlayerNum, callback }: { players
         callback(Number(select.value));
     };
 
-    console.log(selectedPlayerNum);
     return (
         <Form.Select value={selectedPlayerNum} onChange={submitPicker}>
+            <option>?</option>
             {players.map((player, i) => (
                 <option value={i}>
                     {getPlayerName(player)}

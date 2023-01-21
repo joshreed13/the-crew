@@ -1,4 +1,4 @@
-import { Badge, Card as BootstrapCard, Col, Container, Row } from 'react-bootstrap';
+import { Badge, Card as BootstrapCard, Col, Container, Row, Stack } from 'react-bootstrap';
 import { Card, Player, Trick, Turn } from "./model";
 import { CardPicker } from "./CardPicker";
 import { apiCall } from "./api";
@@ -76,10 +76,12 @@ function TurnView({ data, trickNum, turnNum, possibleCards }: { data: Turn, tric
                 </Row>
                 <Row>
                     <Col>
-                        {<CardPicker cards={possibleCards} callback={(card: Card) => {
-                            apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
-                        }} />}
-                        {data.card && <CardView card={data.card} />}
+                        <Stack>
+                            {<CardPicker cards={possibleCards} callback={(card: Card) => {
+                                apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
+                            }} />}
+                            {data.card && <CardView card={data.card} />}
+                        </Stack>
                     </Col>
                 </Row>
             </Container>

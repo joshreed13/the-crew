@@ -22,8 +22,8 @@ export function CardPicker({ cards, callback }: { cards: Card[] | undefined, cal
 
     return (
         <>
-            <Button variant="primary" onClick={showModal}>
-                Choose Card...
+            <Button variant="outline-primary" onClick={showModal}>
+                ...
             </Button>
             <Modal show={show} onHide={closeModal}>
                 <Modal.Header closeButton>

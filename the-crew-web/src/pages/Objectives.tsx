@@ -43,7 +43,9 @@ export default function ObjectivesPage({ data }: { data: ObjectivePageData }) {
 
 function TaskView({ task, players }: { task: Task, players: Player[] }) {
     const rmObj = (taskId: string) => {
-        apiCall(`/api/objective/${taskId}`, {}, "DELETE");
+        if (window.confirm("Are you sure you want to remove this objective?")) {
+            apiCall(`/api/objective/${taskId}`, {}, "DELETE");
+        }
     }
     const setCard = (taskId: string, card: Card) => {
         apiCall(`/api/objective/${taskId}/card`, { card: card });
