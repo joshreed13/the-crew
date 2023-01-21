@@ -67,14 +67,13 @@ class Round:
         self.players[playerNum].hand = cards
 
     def addObjective(self, objtype: str, order: int, card: Optional[Card], playerNum: Optional[int]):
-        self.objectives[self.taskId] = Task(
-            objtype, order, card, playerNum)
+        self.objectives[self.taskId] = Task(objtype, order, card, playerNum)
         self.taskId += 1
 
     def removeObjective(self, id: int):
         obj = self.objectives.get(id)
-        if obj and obj.type in {"absolute", "relative"}:
-            for id, task in self.objectives.items():
+        if obj is not None and obj.type in {"absolute", "relative"}:
+            for _, task in self.objectives.items():
                 if task.type == obj.type and task.order > obj.order:
                     task.order -= 1
         del self.objectives[id]
