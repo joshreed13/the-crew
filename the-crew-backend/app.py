@@ -119,7 +119,7 @@ def setTrickTurnCard(trickIndex, turnIndex):
     return Response("Success")
 
 
-@ app.route("/api/solve", methods=['PUT'])
+@ app.route("/api/solve", methods=['POST'])
 def solve():
     def callback(id, result):
         STATE.addSolverResult(id, result)
