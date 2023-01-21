@@ -7,14 +7,15 @@ import {
   Link,
 } from "react-router-dom"
 import io, { Socket } from 'socket.io-client'
-import './App.css';
-import { AppState, Card, Player, Task, Trick } from './model';
+import { AppState } from './model';
 import UserPage from './pages/User';
 import HandPage from './pages/Hand';
 import ObjectivesPage from './pages/Objectives';
 import TricksPage from './pages/Tricks';
 import ControlPanel from './pages/ControlPanel';
 import SolverPage from './pages/Solver';
+
+import './App.css';
 
 interface ServerToClientEvents {
   "appstate": (data: AppState) => void;
@@ -76,7 +77,7 @@ function App() {
 function Root({ isConnected }: { isConnected: boolean }) {
   return (
     <>
-      <div id="sidebar">
+      <div>
         <Link to={`/`}><h1>🚀</h1></Link>
         <p>{isConnected ? "Connected" : "Disconnected"}</p>
         <nav>
@@ -101,7 +102,7 @@ function Root({ isConnected }: { isConnected: boolean }) {
             </li>
           </ul>
         </nav>
-      </div >
+      </div>
       <div id="detail">
         <Outlet />
       </div>
