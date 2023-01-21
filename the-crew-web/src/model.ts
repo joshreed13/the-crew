@@ -20,11 +20,11 @@ export type ObjectivePageData = {
 
 export type TricksPageData = {
     tricks: Trick[];
+    heldCards: Card[][];
 };
 
 export type ControlPanelData = {
     players: PlayerData[];
-    tricks: Trick[];
 }
 
 export type SolverPageData = {

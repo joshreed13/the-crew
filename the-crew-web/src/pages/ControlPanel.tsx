@@ -1,11 +1,12 @@
-import { Button, Col, ListGroup, Row, Stack } from "react-bootstrap";
-import { ControlPanelData, PlayerData } from "../model";
+import { Button, Col, Row, Stack } from "react-bootstrap";
+import { ControlPanelData, PlayerData, TricksPageData } from "../model";
 import { CardView, PlayerName, TaskTokenView, TrickView } from "../Common";
 import { apiCall } from "../api";
 
 import "./ControlPanel.css"
+import TricksPage from "./Tricks";
 
-export default function ControlPanel({ data }: { data: ControlPanelData }) {
+export default function ControlPanel({ data, tricksData, selectedPlayer }: { data: ControlPanelData, tricksData: TricksPageData, selectedPlayer: number | undefined }) {
     const resetGame = () => {
         if (window.confirm("Are you sure you want to reset the game?")) {
             apiCall(`/api/reset`, {}, "POST");
@@ -20,9 +21,7 @@ export default function ControlPanel({ data }: { data: ControlPanelData }) {
             <Row>
                 {data.players.map((playerData) => (<PlayerView data={playerData} />))}
             </Row>
-            <Row>
-                {data.tricks.map((trickData, i) => (<TrickView data={trickData} trickNum={i} />))}
-            </Row>
+            <TricksPage data={tricksData} selectedPlayer={selectedPlayer} />
         </>
     );
 }

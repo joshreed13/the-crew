@@ -9,7 +9,7 @@ function numInSuit(suit: string) {
     return suit == "R" ? 4 : 9;
 }
 
-export function CardPicker({ callback }: { callback: (card: Card) => void }) {
+export function CardPicker({ cards, callback }: { cards: Card[] | undefined, callback: (card: Card) => void }) {
     const [show, setShow] = useState(false);
 
     const closeModal = () => setShow(false);
@@ -36,10 +36,13 @@ export function CardPicker({ callback }: { callback: (card: Card) => void }) {
                                 {Array.from(Array(numInSuit(suit)).keys()).map((i) => {
                                     const card = { suit: suit, value: i + 1 };
                                     return (
-                                        <Button variant="outline-dark" onClick={(e) => submitPicker(card)}>
-                                            <CardView card={card} />
-                                        </Button>
-                                    )
+                                        <>
+                                            {(cards === undefined || cards.some((c) => c.suit == card.suit && c.value == card.value)) &&
+                                                <Button variant="outline-dark" onClick={(e) => submitPicker(card)}>
+                                                    <CardView card={card} />
+                                                </Button>}
+                                        </>
+                                    );
                                 })}
                             </Stack>
                         ))}

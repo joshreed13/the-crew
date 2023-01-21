@@ -32,8 +32,8 @@ function App() {
   const [data, setData] = useState<AppState>({
     handPage: { heldCards: [] },
     objectivePage: { tasks: [], nextAbsolute: 1, nextRelative: 1, haveLast: false, players: [] },
-    tricksPage: { tricks: [] },
-    controlPanel: { players: [], tricks: [] },
+    tricksPage: { tricks: [], heldCards: [] },
+    controlPanel: { players: [] },
     solverPage: { solves: [] },
   });
   const [selectedPlayer, setSelectedPlayer] = useState<number | undefined>(0);
@@ -67,8 +67,8 @@ function App() {
           <Route path="user/" element={<UserPage players={data.objectivePage.players} selectedPlayer={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />} />
           <Route path="hand/" element={<HandPage data={data.handPage} selectedPlayer={selectedPlayer} />} />
           <Route path="objectives/" element={<ObjectivesPage data={data.objectivePage} />} />
-          <Route path="tricks/" element={<TricksPage data={data.tricksPage} />} />
-          <Route path="controlpanel/" element={<ControlPanel data={data.controlPanel} />} />
+          <Route path="tricks/" element={<TricksPage data={data.tricksPage} selectedPlayer={selectedPlayer} />} />
+          <Route path="controlpanel/" element={<ControlPanel data={data.controlPanel} tricksData={data.tricksPage} selectedPlayer={selectedPlayer} />} />
           <Route path="solver/" element={<SolverPage data={data.solverPage} />} />
         </Route>
       </Route>

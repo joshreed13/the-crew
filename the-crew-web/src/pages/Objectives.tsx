@@ -64,7 +64,7 @@ function TaskView({ task, players }: { task: Task, players: Player[] }) {
                     </Col>
                     <Col>
                         {task.card && <CardView card={task.card} />}
-                        <CardPicker callback={(card: Card) => { setCard(task.id, card) }} />
+                        <CardPicker cards={undefined} callback={(card: Card) => { setCard(task.id, card) }} />
                     </Col>
                     <Col>
                         <PlayerPicker players={players} selectedPlayerNum={task.player?.num} callback={(playerNum) => (setPlayer(task.id, playerNum))} />

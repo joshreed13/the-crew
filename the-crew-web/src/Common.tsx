@@ -1,8 +1,9 @@
-import { Badge, Card as BootstrapCard, Col, Container, ListGroup, Row } from 'react-bootstrap';
-import { Card, Player, Task, Trick, Turn } from "./model";
-import "./Common.css";
+import { Badge, Card as BootstrapCard, Col, Container, Row } from 'react-bootstrap';
+import { Card, Player, Trick, Turn } from "./model";
 import { CardPicker } from "./CardPicker";
 import { apiCall } from "./api";
+
+import "./Common.css";
 
 export function CardView({ card }: { card: Card }) {
     switch (card.suit) {
@@ -47,23 +48,26 @@ export function PlayerName({ player }: { player: Player | undefined }) {
     }
 }
 
-export function TrickView({ data, trickNum }: { data: Trick, trickNum: number }) {
+export function TrickView({ data, trickNum, heldCards, selectedPlayer }: { data: Trick, trickNum: number, heldCards: Card[][], selectedPlayer: number | undefined }) {
     return (
         <BootstrapCard>
             <Container>
                 <Row>
-                    {data.turns.map((turn, i) => (
-                        <Col>
-                            <TurnView data={turn} trickNum={trickNum} turnNum={i} />
-                        </Col>
-                    ))}
+                    {data.turns.map((turn, i) => {
+                        const possibleCards = getPossibleCards(i, heldCards, selectedPlayer);
+                        return (
+                            <Col>
+                                <TurnView data={turn} trickNum={trickNum} turnNum={i} possibleCards={possibleCards} />
+                            </Col>
+                        )
+                    })}
                 </Row>
             </Container>
         </BootstrapCard>
     );
 }
 
-function TurnView({ data, trickNum, turnNum }: { data: Turn, trickNum: number, turnNum: number }) {
+function TurnView({ data, trickNum, turnNum, possibleCards }: { data: Turn, trickNum: number, turnNum: number, possibleCards: Card[] }) {
     return (
         <div>
             <Container>
@@ -77,7 +81,7 @@ function TurnView({ data, trickNum, turnNum }: { data: Turn, trickNum: number, t
                 </Row>
                 <Row>
                     <Col>
-                        {<CardPicker callback={(card: Card) => {
+                        {<CardPicker cards={possibleCards} callback={(card: Card) => {
                             apiCall(`/api/trick/${trickNum}/${turnNum}/card`, { card: card });
                         }} />}
                         {data.card && <CardView card={data.card} />}
@@ -86,4 +90,24 @@ function TurnView({ data, trickNum, turnNum }: { data: Turn, trickNum: number, t
             </Container>
         </div >
     );
+}
+
+function getPossibleCards(forPlayer: number, heldCards: Card[][], selectedPlayer: number | undefined): Card[] {
+    if (forPlayer === selectedPlayer) {
+        if (forPlayer < heldCards.length) {
+            return heldCards[forPlayer];
+        }
+        else {
+            return [];
+        }
+    }
+    else {
+        let possibleCards: Card[] = [];
+        for (let i = 0; i < heldCards.length; i++) {
+            if (i != selectedPlayer) {
+                possibleCards = possibleCards.concat(heldCards[i]);
+            }
+        }
+        return possibleCards;
+    }
 }

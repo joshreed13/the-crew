@@ -165,15 +165,15 @@ class Round:
                 "players": [toPlayer(playerNum, player) for playerNum, player in enumerate(self.players)],
             },
             "tricksPage": {
-                "tricks": tricks
+                "tricks": tricks,
+                "heldCards": [[toCard(card) for card in player.hand] for player in self.players]
             },
             "controlPanel": {
                 "players": [{
                     "player": toPlayer(playerNum, player),
                     "hand": [toCard(card) for card in player.hand],
                     "tasks": [toTask(id, task) for id, task in self.objectives.items() if task.playerNum == playerNum],
-                } for playerNum, player in enumerate(self.players)],
-                "tricks": tricks
+                } for playerNum, player in enumerate(self.players)]
             },
             "solverPage": {
                 "solves": [{
